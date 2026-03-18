@@ -1,5 +1,11 @@
 # Generation results
 results/
+results_cifar/
+results_church/
+
+# Local datasets
+cifar-10/
+archive/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

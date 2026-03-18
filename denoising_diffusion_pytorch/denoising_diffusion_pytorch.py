@@ -681,7 +681,7 @@ class GaussianDiffusion(Module):
         return pred_img, x_start
 
     @torch.inference_mode()
-    def p_sample_loop(self, shape, return_all_timesteps = False):
+    def p_sample_loop(self, shape, return_all_timesteps = False, show_progress = True):
         batch, device = shape[0], self.device
 
         img = torch.randn(shape, device = device)
@@ -694,7 +694,7 @@ class GaussianDiffusion(Module):
         autocast_ctx = autocast('cuda') if use_autocast else nullcontext()
 
         with autocast_ctx:
-            for t in tqdm(reversed(range(0, self.num_timesteps)), desc = 'sampling loop time step', total = self.num_timesteps):
+            for t in tqdm(reversed(range(0, self.num_timesteps)), desc = 'sampling loop time step', total = self.num_timesteps, disable = not show_progress):
                 self_cond = x_start if self.self_condition else None
                 img, x_start = self.p_sample(img, t, self_cond)
                 imgs.append(img)
@@ -705,7 +705,7 @@ class GaussianDiffusion(Module):
         return ret
 
     @torch.inference_mode()
-    def ddim_sample(self, shape, return_all_timesteps = False):
+    def ddim_sample(self, shape, return_all_timesteps = False, show_progress = True):
         batch, device, total_timesteps, sampling_timesteps, eta, objective = shape[0], self.device, self.num_timesteps, self.sampling_timesteps, self.ddim_sampling_eta, self.objective
 
         times = torch.linspace(-1, total_timesteps - 1, steps = sampling_timesteps + 1)   # [-1, 0, 1, 2, ..., T-1] when sampling_timesteps == total_timesteps
@@ -722,7 +722,7 @@ class GaussianDiffusion(Module):
         autocast_ctx = autocast('cuda') if use_autocast else nullcontext()
 
         with autocast_ctx:
-            for time, time_next in tqdm(time_pairs, desc = 'sampling loop time step'):
+            for time, time_next in tqdm(time_pairs, desc = 'sampling loop time step', disable = not show_progress):
                 time_cond = torch.full((batch,), time, device = device, dtype = torch.long)
                 self_cond = x_start if self.self_condition else None
                 pred_noise, x_start, *_ = self.model_predictions(img, time_cond, self_cond, clip_x_start = True, rederive_pred_noise = True)
@@ -752,10 +752,10 @@ class GaussianDiffusion(Module):
         return ret
 
     @torch.inference_mode()
-    def sample(self, batch_size = 16, return_all_timesteps = False):
+    def sample(self, batch_size = 16, return_all_timesteps = False, show_progress = True):
         (h, w), channels = self.image_size, self.channels
         sample_fn = self.p_sample_loop if not self.is_ddim_sampling else self.ddim_sample
-        return sample_fn((batch_size, channels, h, w), return_all_timesteps = return_all_timesteps)
+        return sample_fn((batch_size, channels, h, w), return_all_timesteps = return_all_timesteps, show_progress = show_progress)
 
     @torch.inference_mode()
     def interpolate(self, x1, x2, t = None, lam = 0.5):
@@ -891,8 +891,9 @@ class Trainer:
     def __init__(
         self,
         diffusion_model,
-        folder,
+        folder = None,
         *,
+        dataset = None,
         train_batch_size = 16,
         gradient_accumulate_every = 1,
         augment_horizontal_flip = True,
@@ -914,7 +915,8 @@ class Trainer:
         fid_ddim_steps = 50,
         max_grad_norm = 1.,
         num_fid_samples = 50000,
-        save_best_and_latest_only = False
+        save_best_and_latest_only = False,
+        save_samples = True
     ):
         super().__init__()
 
@@ -942,6 +944,8 @@ class Trainer:
         self.num_samples = num_samples
         self.save_and_sample_every = save_and_sample_every
 
+        self.save_samples = save_samples
+
         self.batch_size = train_batch_size
         self.gradient_accumulate_every = gradient_accumulate_every
         assert (train_batch_size * gradient_accumulate_every) >= 16, f'your effective batch size (train_batch_size x gradient_accumulate_every) should be at least 16 or above'
@@ -953,11 +957,15 @@ class Trainer:
 
         # dataset and dataloader
 
-        self.ds = Dataset(folder, self.image_size, augment_horizontal_flip = augment_horizontal_flip, convert_image_to = convert_image_to)
+        if exists(dataset):
+            self.ds = dataset
+        else:
+            assert exists(folder), 'either folder or dataset must be provided'
+            self.ds = Dataset(folder, self.image_size, augment_horizontal_flip = augment_horizontal_flip, convert_image_to = convert_image_to)
 
         assert len(self.ds) >= 100, 'you should have at least 100 images in your folder. at least 10k images recommended'
 
-        dl = DataLoader(self.ds, batch_size = train_batch_size, shuffle = True, pin_memory = True, num_workers = cpu_count())
+        dl = DataLoader(self.ds, batch_size = train_batch_size, shuffle = True, pin_memory = True, num_workers = min(cpu_count(), 8))
 
         dl = self.accelerator.prepare(dl)
         self.dl = cycle(dl)
@@ -1095,22 +1103,24 @@ class Trainer:
                     if self.step != 0 and divisible_by(self.step, self.save_and_sample_every):
                         self.ema.ema_model.eval()
 
-                        with torch.inference_mode():
-                            milestone = self.step // self.save_and_sample_every
-                            batches = num_to_groups(self.num_samples, self.batch_size)
-                            all_images_list = []
-                            for n in batches:
-                                with self.accelerator.autocast():
-                                    imgs = self.ema.ema_model.sample(batch_size=n)
-                                all_images_list.append(imgs)
-########
-                        all_images = torch.cat(all_images_list, dim = 0)
+                        milestone = self.step // self.save_and_sample_every
 
-                        utils.save_image(all_images, str(self.results_folder / f'sample-{milestone}.png'), nrow = int(math.sqrt(self.num_samples)))
+                        if self.save_samples:
+                            with torch.inference_mode():
+                                batches = num_to_groups(self.num_samples, self.batch_size)
+                                all_images_list = []
+                                for n in batches:
+                                    with self.accelerator.autocast():
+                                        imgs = self.ema.ema_model.sample(batch_size=n)
+                                    all_images_list.append(imgs)
+
+                            all_images = torch.cat(all_images_list, dim = 0)
+                            utils.save_image(all_images, str(self.results_folder / f'sample-{milestone}.png'), nrow = int(math.sqrt(self.num_samples)))
 
                         # whether to calculate fid
 
                         if self.calculate_fid:
+                            accelerator.print('Calculating FID...')
                             fid_score = self.fid_scorer.fid_score()
                             accelerator.print(f'fid_score: {fid_score}')
 

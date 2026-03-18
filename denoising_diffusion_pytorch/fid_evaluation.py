@@ -118,9 +118,9 @@ class FIDEvaluation:
                     if torch.cuda.is_available():
                         from torch.cuda.amp import autocast
                         with autocast():
-                            fake_samples = self.sampler.ddim_sample((batch, self.channels, h, w))
+                            fake_samples = self.sampler.ddim_sample((batch, self.channels, h, w), show_progress = False)
                     else:
-                        fake_samples = self.sampler.ddim_sample((batch, self.channels, h, w))
+                        fake_samples = self.sampler.ddim_sample((batch, self.channels, h, w), show_progress = False)
                 finally:
                     if old_steps is not None:
                         self.sampler.sampling_timesteps = old_steps
@@ -129,9 +129,9 @@ class FIDEvaluation:
                 if torch.cuda.is_available():
                     from torch.cuda.amp import autocast
                     with autocast():
-                        fake_samples = self.sampler.sample(batch_size=batch)
+                        fake_samples = self.sampler.sample(batch_size=batch, show_progress = False)
                 else:
-                    fake_samples = self.sampler.sample(batch_size=batch)
+                    fake_samples = self.sampler.sample(batch_size=batch, show_progress = False)
 
             fake_features = self.calculate_inception_features(fake_samples)
             stacked_fake_features.append(fake_features)
