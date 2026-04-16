@@ -41,7 +41,7 @@ class Attend(nn.Module):
         self,
         dropout = 0.,
         flash = False,
-        scale = None
+        scale = None # scale factor for query, default is sqrt(d) if not specified
     ):
         super().__init__()
         self.dropout = dropout

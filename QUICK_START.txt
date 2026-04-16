@@ -1,0 +1,236 @@
+# 🚀 QUICK START: DDPM Colab Training (15-30 min)
+
+## ⚡ Setup Nhanh
+
+```python
+# Copy-paste vào Colab cell đầu tiên:
+!pip install -q torch torchvision accelerate ema-pytorch einops tqdm
+
+import torch
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"GPU: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU'}")
+```
+
+---
+
+## 📊 Để Hiểu Cách Nó Hoạt Động
+
+### Forward Diffusion (Thêm Nhiễu)
+```
+x₀ (data gốc)
+   ↓ add noise
+x₁ (ít noise)
+   ↓ add noise
+x₂ 
+   ...
+x_T (pure noise)
+
+Công thức: x_t = √ᾱ_t·x₀ + √(1-ᾱ_t)·ε
+```
+
+### Model Learning
+```
+Input: (x_t, t)
+   ↓ UNet
+Output: ε_pred (dự đoán noise)
+
+Loss = ||ε_pred - ε||²  (so sánh với noise thật)
+```
+
+### Reverse Process (Bỏ Nhiễu)
+```
+x_T (pure noise)
+   ↓ model dự đoán & bỏ noise
+x_{T-1} (ít noise hơn)
+   ↓ lặp lại
+x_0 (data sinh ra)
+```
+
+---
+
+## 🔧 Nơi Thay Đổi Noise Distribution
+
+### Cách 1: Beta Schedule ⭐ Quan Trọng
+
+```python
+# Hiện tại
+diffusion = GaussianDiffusion1D(
+    model,
+    seq_length=seq_length,
+    timesteps=100,
+    beta_schedule='cosine'  # ← THAY ĐÂY
+)
+
+# Tùy chọn
+# beta_schedule='linear'    - đơn giản
+# beta_schedule='cosine'    - tốt nhất
+# beta_schedule='sigmoid'   - hiện đại
+```
+
+### Cách 2: Noise Type
+
+```python
+# Trong GaussianDiffusion1D.q_sample():
+
+# Mặc định (Gaussian)
+noise = torch.randn_like(x_start)
+
+# Uniform
+noise = (torch.rand_like(x_start) * 2 - 1) * math.sqrt(3)
+
+# Laplace
+noise = torch.randn_like(x_start) * 1.4
+```
+
+### Cách 3: Timesteps
+
+```python
+# Colab: 100 (~5 min training)
+diffusion = GaussianDiffusion1D(..., timesteps=100)
+
+# Tốt hơn: 200 (~10 min)
+diffusion = GaussianDiffusion1D(..., timesteps=200)
+
+# SOTA: 1000 (~50 min)
+diffusion = GaussianDiffusion1D(..., timesteps=1000)
+```
+
+### Cách 4: Noise Strength
+
+```python
+# Trong q_sample():
+STRENGTH = 1.0  # 0.5 (weak), 1.0 (normal), 1.5 (strong)
+
+return sqrt_alpha_prod * x_start + sqrt_one_minus_alpha_prod * STRENGTH * noise
+```
+
+---
+
+## 📈 Timeline Thực Hành
+
+### 0-5 phút: Setup & Data
+- Cài packages
+- Tạo synthetic data
+- Visualize data gốc
+
+### 5-10 phút: Model & Training
+- Define Unet1D
+- Define GaussianDiffusion1D
+- Run training loop (5000 steps)
+
+### 10-15 phút: Sampling & Viz
+- Generate samples từ trained model
+- Visualize reverse diffusion process
+- Compare original vs generated
+
+### 15-20 phút: Experimentation
+- Thay đổi beta_schedule
+- Tăng timesteps
+- Thay noise distribution
+- Retrain & compare
+
+---
+
+## 🎯 Các Biến Chuyển Chính
+
+| Biến | Vị Trí | Ảnh Hưởng | Mục Đích |
+|------|--------|----------|---------|
+| `beta_schedule` | GaussianDiffusion1D init | Kiểm soát noise progression | Thay 'linear'/'cosine'/'sigmoid' |
+| `timesteps` | GaussianDiffusion1D init | Độ chi tiết của process | Tăng → tốt hơn, chậm hơn |
+| `noise` (q_sample) | GaussianDiffusion1D.q_sample() | Loại noise phân phối | Gaussian/Uniform/Laplace |
+| `STRENGTH` (q_sample) | GaussianDiffusion1D.q_sample() | Mức độ noise mạnh | 0.5/1.0/1.5 |
+| `num_epochs` | Training loop | Tổng iterations | Tăng → tốt hơn, chậm hơn |
+| `batch_size` | Training | Batch size | 32/64/128 |
+| `learning_rate` | Optimizer | Learning rate | 1e-3/1e-4/1e-5 |
+
+---
+
+## ⚡ Performance Cheat Sheet
+
+```
+Colab GPU (T4 hoặc V100):
+
+Config                          Training  Sampling  Quality
+─────────────────────────────────────────────────────────
+T=50, batch=64, 1 epoch         1 min     0.5 sec   Fair
+T=100, batch=64, 2 epochs       5 min     1 sec     Good
+T=200, batch=64, 2 epochs       10 min    2 sec     Very Good
+T=1000, batch=32, 2 epochs      50 min    10 sec    Excellent
+```
+
+---
+
+## 🎨 Kết Quả Mong Đợi
+
+```
+Original Data:        Generated Data:        Comparison:
+sine wave            wavy pattern            ✓ Similar shape
+mix of signals       diverse signals        ✓ Good diversity
+stationary trend     new patterns           ✓ Learned distribution
+```
+
+---
+
+## 💾 Checkpoint & Load
+
+```python
+# Save model
+torch.save({
+    'model': model.state_dict(),
+    'diffusion': diffusion.state_dict(),
+    'optimizer': optimizer.state_dict()
+}, '/tmp/checkpoint.pt')
+
+# Load model
+ckpt = torch.load('/tmp/checkpoint.pt')
+model.load_state_dict(ckpt['model'])
+diffusion.load_state_dict(ckpt['diffusion'])
+```
+
+---
+
+## 🐛 Debugging Tips
+
+```python
+# 1. Check shapes
+x_t.shape  # Should be (batch, 1, seq_length)
+t.shape    # Should be (batch,)
+pred.shape # Should match x_t
+
+# 2. Check loss
+if loss > 100 or torch.isnan(loss):
+    print("Loss too high! Check:")
+    # - Data normalization
+    # - Learning rate
+    # - Gradient clipping
+
+# 3. Check samples
+if samples are all same:
+    print("Mode collapse! Try:")
+    # - Increase temperature
+    # - Check model capacity
+    # - Check training convergence
+```
+
+---
+
+## 📚 Tài Liệu Tham Khảo
+
+- **DDPM Paper**: Ho et al., "Denoising Diffusion Probabilistic Models" (2020)
+- **Cosine Schedule**: Nichol & Dhariwal, "Improved DDPM" (2021)  
+- **Sigmoid Schedule**: Karras et al., "Elucidating Design Space" (2022)
+
+---
+
+## 🚀 Next Level
+
+Sau khi thành thạo:
+- [ ] Thử DDIM sampling (100x nhanh hơn)
+- [ ] Conditional generation (guided by label)
+- [ ] Classifier-free guidance
+- [ ] Score-based generative models
+- [ ] Consistency models (training 1 step!)
+
+---
+
+**Happy Diffusion! 🎉**
