@@ -23,8 +23,8 @@ class FIDEvaluation:
     def __init__(
         self,
         batch_size,
-        dl,
-        sampler,
+        dl, # dataloader for real samples
+        sampler, # model
         channels=3,
         accelerator=None,
         stats_dir="./results",
@@ -32,7 +32,7 @@ class FIDEvaluation:
         num_fid_samples=50000,
         inception_block_idx=2048,
         image_size=(128, 128),
-        use_ddim=False,
+        use_ddim=False, # use ddim
         ddim_steps=50,
     ):
         self.batch_size = batch_size
@@ -87,9 +87,9 @@ class FIDEvaluation:
             stacked_real_features = (
                 torch.cat(stacked_real_features, dim=0).cpu().numpy()
             )
-            m2 = np.mean(stacked_real_features, axis=0)
-            s2 = np.cov(stacked_real_features, rowvar=False)
-            np.savez_compressed(path, m2=m2, s2=s2)
+            m2 = np.mean(stacked_real_features, axis=0) # mean
+            s2 = np.cov(stacked_real_features, rowvar=False) # covariance
+            np.savez_compressed(path, m2=m2, s2=s2) # save npz
             self.print_fn(f"Dataset stats cached to {path}.npz for future use.")
             self.m2, self.s2 = m2, s2
         self.dataset_stats_loaded = True

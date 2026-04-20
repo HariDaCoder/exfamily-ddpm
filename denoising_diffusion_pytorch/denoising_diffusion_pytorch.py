@@ -282,7 +282,7 @@ class Unet(Module):
         out_dim = None,
         dim_mults = (1, 2, 4, 8),
         channels = 3,
-        self_condition = False,
+        self_condition = False, # 
         learned_variance = False,
         learned_sinusoidal_cond = False,
         random_fourier_features = False,
@@ -492,7 +492,7 @@ class GaussianDiffusion(Module):
         offset_noise_strength = 0.,  # https://www.crosslabs.org/blog/diffusion-with-offset-noise
         min_snr_loss_weight = False, # https://arxiv.org/abs/2303.09556
         min_snr_gamma = 5,
-        immiscible = False
+        immiscible = False # difficult understand
     ):
         super().__init__()
         assert not (type(self) == GaussianDiffusion and model.channels != model.out_dim)
@@ -523,11 +523,11 @@ class GaussianDiffusion(Module):
 
         betas = beta_schedule_fn(timesteps, **schedule_fn_kwargs)
 
-        alphas = 1. - betas
-        alphas_cumprod = torch.cumprod(alphas, dim=0)
-        alphas_cumprod_prev = F.pad(alphas_cumprod[:-1], (1, 0), value = 1.)
+        alphas = 1. - betas # alpha_t = 1 - beta_t
+        alphas_cumprod = torch.cumprod(alphas, dim=0) # alpha_bar_t = prod_{s=1}^t alpha_s
+        alphas_cumprod_prev = F.pad(alphas_cumprod[:-1], (1, 0), value = 1.) # alpha_bar_{t-1}, with alpha_bar_{-1} = 1
 
-        timesteps, = betas.shape
+        timesteps, = betas.shape # number of diffusion steps
         self.num_timesteps = int(timesteps)
 
         # sampling related parameters
@@ -579,7 +579,7 @@ class GaussianDiffusion(Module):
         # derive loss weight
         # snr - signal noise ratio
 
-        snr = alphas_cumprod / (1 - alphas_cumprod)
+        snr = alphas_cumprod / (1 - alphas_cumprod) # signal to noise ratio for a given timestep, as derived in https://arxiv.org/abs/2303.09556 - section 2.4 and appendix A.7
 
         # https://arxiv.org/abs/2303.09556
 
@@ -851,6 +851,184 @@ class GaussianDiffusion(Module):
         img = self.normalize(img)
         return self.p_losses(img, t, *args, **kwargs)
 
+# Exponential-family diffusion, parameterized to predict standardized latent K_t.
+class ExponentialFamilyDiffusion(GaussianDiffusion):
+    def __init__(
+        self,
+        model,
+        *,
+        image_size,
+        timesteps = 1000,
+        sampling_timesteps = None,
+        beta_schedule = 'sigmoid',
+        schedule_fn_kwargs = dict(),
+        ddim_sampling_eta = 0.,
+        auto_normalize = True,
+        offset_noise_strength = 0.,
+        min_snr_loss_weight = False,
+        min_snr_gamma = 5,
+        immiscible = False,
+        latent_distribution = 'gaussian',
+        latent_kwargs = dict(),
+        sampling_method = 'ddpm',
+        mh_steps = 12,
+        mh_proposal_std = 0.1
+    ):
+        super().__init__(
+            model,
+            image_size = image_size,
+            timesteps = timesteps,
+            sampling_timesteps = sampling_timesteps,
+            objective = 'pred_noise',
+            beta_schedule = beta_schedule,
+            schedule_fn_kwargs = schedule_fn_kwargs,
+            ddim_sampling_eta = ddim_sampling_eta,
+            auto_normalize = auto_normalize,
+            offset_noise_strength = offset_noise_strength,
+            min_snr_loss_weight = min_snr_loss_weight,
+            min_snr_gamma = min_snr_gamma,
+            immiscible = immiscible
+        )
+
+        self.latent_distribution = latent_distribution
+        self.latent_kwargs = latent_kwargs
+
+        assert sampling_method in {'ddpm', 'mh'}, 'sampling_method must be either ddpm or mh'
+        self.sampling_method = sampling_method
+        self.mh_steps = mh_steps
+        self.mh_proposal_std = mh_proposal_std
+
+        if self.sampling_method == 'mh':
+            # MH uses full reverse chain and cannot use DDIM skip steps.
+            self.sampling_timesteps = self.num_timesteps
+            self.is_ddim_sampling = False
+
+        # Paper weight: beta_t / (2 * alpha_t * (1 - alpha_bar_{t-1}))
+        alphas = 1. - self.betas
+        denom = (2 * alphas * (1. - self.alphas_cumprod_prev).clamp(min = 1e-20)).clamp(min = 1e-20)
+        loss_weight = self.betas / denom
+        if self.num_timesteps > 1:
+            loss_weight[0] = loss_weight[1]
+        self.loss_weight = loss_weight
+
+    def sample_k(self, x_like):
+        dist = self.latent_distribution
+
+        if dist == 'gaussian':
+            return torch.randn_like(x_like)
+
+        if dist == 'laplace':
+            # Laplace(0, b) has variance 2 b^2; choose b = 1 / sqrt(2) for unit variance.
+            b = float(self.latent_kwargs.get('scale', 2 ** -0.5))
+            laplace = torch.distributions.Laplace(
+                loc = torch.tensor(0., device = x_like.device, dtype = x_like.dtype),
+                scale = torch.tensor(b, device = x_like.device, dtype = x_like.dtype)
+            )
+            return laplace.sample(x_like.shape)
+
+        if dist == 'logistic':
+            scale = float(self.latent_kwargs.get('scale', math.sqrt(3.) / math.pi))
+            u = torch.rand_like(x_like).clamp_(1e-6, 1 - 1e-6)
+            return scale * torch.log(u / (1 - u))
+
+        if dist == 'exponential':
+            rate = float(self.latent_kwargs.get('rate', 1.0))
+            exponential = torch.distributions.Exponential(
+                rate = torch.tensor(rate, device = x_like.device, dtype = x_like.dtype)
+            )
+            raw = exponential.sample(x_like.shape)
+            # Standardize to mean 0 and variance 1.
+            return (raw - (1. / rate)) * rate
+
+        if dist == 'gamma':
+            concentration = float(self.latent_kwargs.get('concentration', 2.0))
+            rate = float(self.latent_kwargs.get('rate', 1.0))
+            gamma = torch.distributions.Gamma(
+                concentration = torch.tensor(concentration, device = x_like.device, dtype = x_like.dtype),
+                rate = torch.tensor(rate, device = x_like.device, dtype = x_like.dtype)
+            )
+            raw = gamma.sample(x_like.shape)
+            mean = concentration / rate
+            std = math.sqrt(concentration) / rate
+            return (raw - mean) / std
+
+        raise ValueError(f'unknown latent_distribution {dist}')
+
+    def eta_x(self, x_t, t):
+        alpha_t = extract(1. - self.betas, t, x_t.shape)
+        alpha_bar_t = extract(self.alphas_cumprod, t, x_t.shape)
+        alpha_bar_prev = extract(self.alphas_cumprod_prev, t, x_t.shape)
+
+        num = (1. - alpha_bar_t)
+        den = (extract(self.betas, t, x_t.shape) * (1. - alpha_bar_prev).clamp(min = 1e-20) * alpha_t.sqrt()).clamp(min = 1e-20)
+        return (num / den) * x_t
+
+    def b_t(self, x_t, t):
+        alpha_t = extract(1. - self.betas, t, x_t.shape)
+        alpha_bar_t = extract(self.alphas_cumprod, t, x_t.shape)
+        alpha_bar_prev = extract(self.alphas_cumprod_prev, t, x_t.shape)
+
+        num = (1. - alpha_bar_t).sqrt()
+        den = ((1. - alpha_bar_prev).clamp(min = 1e-20) * alpha_t.sqrt()).clamp(min = 1e-20)
+        return num / den
+
+    def eta_theta(self, x_t, t, x_self_cond = None):
+        k_theta = self.model(x_t, t, x_self_cond)
+        return self.eta_x(x_t, t) - self.b_t(x_t, t) * k_theta
+
+    def _mh_log_target(self, z, x_t, t, x_self_cond = None):
+        var = extract(1. - self.alphas_cumprod_prev, t, z.shape).clamp(min = 1e-20)
+        eta = self.eta_theta(x_t, t, x_self_cond = x_self_cond)
+        log_p = -(z ** 2) / (2 * var) + eta * z
+        return reduce(log_p, 'b ... -> b', 'sum')
+
+    @torch.inference_mode()
+    def p_sample(self, x, t: int, x_self_cond = None):
+        if self.sampling_method != 'mh':
+            return super().p_sample(x, t, x_self_cond = x_self_cond)
+
+        b, *_, device = *x.shape, self.device
+        batched_times = torch.full((b,), t, device = device, dtype = torch.long)
+
+        z = x
+        for _ in range(self.mh_steps):
+            proposal = z + self.mh_proposal_std * torch.randn_like(z)
+            log_alpha = self._mh_log_target(proposal, x, batched_times, x_self_cond = x_self_cond) - self._mh_log_target(z, x, batched_times, x_self_cond = x_self_cond)
+            accept = (torch.log(torch.rand_like(log_alpha).clamp(min = 1e-20)) < log_alpha.clamp(max = 0.)).float()
+            accept = rearrange(accept, 'b -> b 1 1 1')
+            z = proposal * accept + z * (1. - accept)
+
+        x_start = self.model_predictions(x, batched_times, x_self_cond = x_self_cond).pred_x_start
+        return z, x_start
+
+    def p_losses(self, x_start, t, noise = None, offset_noise_strength = None):
+        k_t = default(noise, lambda: self.sample_k(x_start))
+
+        if self.immiscible:
+            assign = self.noise_assignment(x_start, k_t)
+            k_t = k_t[assign]
+
+        offset_noise_strength = default(offset_noise_strength, self.offset_noise_strength)
+
+        if offset_noise_strength > 0.:
+            offset_noise = torch.randn(x_start.shape[:2], device = self.device)
+            k_t += offset_noise_strength * rearrange(offset_noise, 'b c -> b c 1 1')
+
+        x = self.q_sample(x_start = x_start, t = t, noise = k_t)
+
+        x_self_cond = None
+        if self.self_condition and random() < 0.5:
+            with torch.no_grad():
+                x_self_cond = self.model_predictions(x, t).pred_x_start
+                x_self_cond.detach_()
+
+        k_theta = self.model(x, t, x_self_cond)
+
+        loss = F.mse_loss(k_theta, k_t, reduction = 'none')
+        loss = reduce(loss, 'b ... -> b', 'mean')
+
+        loss = loss * extract(self.loss_weight, t, loss.shape)
+        return loss.mean()
 # dataset classes
 
 class Dataset(Dataset):

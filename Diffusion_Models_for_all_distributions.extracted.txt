@@ -1,0 +1,3149 @@
+
+
+===== PAGE 1 =====
+Diffusion Models
+A, B, C, Lan V . Truong∗
+Faculty of Computer Science and Engineering,
+Ho Chi Minh University of Technology (HCMUT),
+Vietnam National University Ho Chi Minh City (VNU-HCM), Vietnam
+lantv@hcmut.edu.vn
+Abstract
+1 Introduction
+2 Main Results
+Let {εt}T
+t=1 be a sequence of i.i.d. random variables in Rd with mean µ and covariance I, where
+ε1 ∼P E belongs to the exponential family. Define
+xt =
+p
+1−β txt−1 +
+p
+βt(εt −µ),(1)
+Then, from (1) we have
+q(xt|xt−1) = 1
+(√βt)d PE
+ xt − √1−β txt−1 + √βtµ√βt
+
+(2)
+Then, we choose the exponential family such that
+q(xt|xt−1) = 1
+(√βt)d PE
+ xt − √1−β txt−1 + √βtµ√βt
+
+(3)
+=g(x t, xt−1)eη0(xt)T T0(xt−1)−A0(η0(xt)),(4)
+where g(xt, xt−1) is not a function of η0(xt), and A0(η(xt)) is a function of η(xt)). Now, from (1)
+we have
+xt =
+p
+1−β txt−1 +
+p
+βt(εt −µ)(5)
+=
+p
+1−β t
+p
+1−β t−1xt−2 +
+p
+βt−1(εt−1 −µ) +
+p
+βt(εt −µ)(6)
+... (7)
+=· · ·(8)
+... (9)
+=
+p
+(1−β t)(1−β t−1)· · ·(1−β 1)x0 +V t,(10)
+where
+Vt =
+p
+βt(εt −µ) +
+p
+(1−β t)βt−1(εt−1 −µ) +
+p
+(1−β t)(1−β t−1)βt−2(εt−2 −µ)+
++· · ·+
+p
+(1−β t)(1−β t−1)· · ·(1−β 2)β1(ε1 −µ).(11)
+∗Use footnote for providing further information about author (webpage, alternative address)—notfor
+acknowledging funding agencies.
+Preprint. Under review.
+
+===== PAGE 2 =====
+It is easy to see that
+E[Vt] = 0,(12)
+cov(Vt) = [βt + (1−β t)βt−1 +· · ·+ (1−β t)(1−β t−1)· · ·(1−β 2)β1
+= 1−(1−β 1)(1−β 2)· · ·(1−β t)]I,(13)
+where (13) can be proved by using the induction. Now, let αt := 1−β t and ¯αt :=Qt
+s=1 αs, then
+we have
+cov(Vt) = (1−¯αt)I.(14)
+Now, let
+Kt = Vt√1−¯αt
+,(15)
+then from (10) we have
+xt = √¯αtx0 +
+√
+1−¯αtKt.(16)
+It follows that
+q(xt|x0) = 1√1−¯αt
+PKt
+ xt − √¯αtx0√1−¯αt
+
+.(17)
+Now, the following result is well-known (Edgeworth Expansion).
+Lemma 1 Let U1, U2,· · ·, U n
+i.i.d.
+∼f U(·) with E[U] =κ 1,var(U) =κ 2, higher-order cumulants
+κ3, κ4,· · ·,and cumulant generating function
+KU(t) = log(E[etU]) =
+∞X
+j=1
+κj
+tj
+j! .(18)
+LetX n =
+Pn
+i=1 Ui−nκ1√nκ2
+is the standardized sample mean, then the following holds
+fXn(x) =φ(x)
+
+1 + ρ3
+6√n H3(x) +O(n −1/2)
+
+,(19)
+where
+ρ3 =κ 3/κ3/2
+2 .(20)
+Then, the following result is straightforward to derive.
+Lemma 2 Let U1, U2,· · ·, U n
+i.i.d.
+∼f U(·)∈R d with E[U1] =κ 1,cov(U 1) =κ 2I, higher-order
+cumulantsκ 3, κ4,· · ·,and cumulant generating function
+KU1,l(t) = log(E[etU1,l]) =
+∞X
+j=1
+κj,l
+tj
+j! ,∀l∈[d].(21)
+LetX n =
+Pn
+i=1 Ui−nκ1√nκ2
+is the standardized sample mean, then the following holds
+fXn(x) =φ(x)
+dY
+l=1
+
+1 + ρ3,l
+6√n H3(xl) +O(n −1/2)
+
+(22)
+=φ(x)
+
+1 + 1
+6√n
+dX
+l=1
+ρ3,lH3(xl) +O(n −1/2)
+
+∀x∈R d,(23)
+where
+ρ3,l =κ 3,l/κ3/2
+2 .(24)
+2
+
+===== PAGE 3 =====
+Now, by Lemma 1 we have
+q(xt|x0) = 1√1−¯αt
+φ
+ xt − √¯αtx0√1−¯αt
+
+1 + ρ3
+6√n H3
+ xt − √¯αtx0√1−¯αt
+
++O(n −1/2)
+
+,(25)
+and
+q(xt−1|x0) = 1√1−¯αt−1
+φ
+ xt−1 − √¯αt−1x0√1−¯αt−1
+
+1 + ρ3
+6√n H3
+ xt−1 − √¯αt−1x0√1−¯αt−1
+
++O(n −1/2)
+
+,
+(26)
+Then, we have
+q(xt−1|xt, x0) =q(x t|xt−1) q(xt−1|x0)
+q(xt|x0) (27)
+=q(x t|xt−1)
+s
+1−¯αt
+1−¯αt−1
+φ
+ xt−1 − √¯αt−1x0√1−¯αt−1
+
+/φ
+ xt − √¯αtx0√1−¯αt
+
+Q(xt, xt−1, x0)
+(28)
+=h(x t−1, xt, x0)Q(xt, xt−1, x0),(29)
+where
+Q(xt, xt−1, x0) =g(x t, xt−1)·
+1 + 1
+6√n
+Pd
+l=1 ρ3,lH3
+
+xt−1,l−√¯αt−1x0,l√
+1−¯αt−1
+
++O(n −1/2)
+1 + 1
+6√n
+Pd
+l=1 ρ3,lH3
+
+xt,l−√¯αtx0,l√1−¯αt
+
++O(n −1/2)
+.(30)
+Then, we have
+log pθ(xt−1|xt)
+q(xt−1|xt, x0) = log pθ(xt−1|xt)
+h(xt−1, xt, x0) −logQ(x t, xt−1, x0).(31)
+Now, we have
+h(xt−1, xt, x0)
+=q(x t|xt−1)
+s
+1−¯αt
+1−¯αt−1
+φ
+ xt−1 − √¯αt−1x0√1−¯αt−1
+
+/φ
+ xt − √¯αtx0√1−¯αt
+
+(32)
+=g(x t, xt−1) exp
+
+− ∥xt−1∥2 + ¯αt−1∥x0∥2
+2(1−¯αt−1)
+
+e
+η0(xt)T T0(xt−1)+
+√¯αt−1
+1−¯αt−1
+x0xt−1
+s
+1−¯αt
+1−¯αt−1
+/φ
+ xt − √¯αtx0√1−¯αt
+
+(33)
+=g(x t, xt−1) exp
+
+− ∥xt−1∥2 + ¯αt−1∥x0∥2
+2(1−¯αt−1)
+
+e
+η(xt)T T0(xt−1)+
+√¯αt−1
+1−¯αt−1
+x0xt−1
+(34)
+=g(x t, xt−1) exp
+
+− ∥xt−1∥2 + ¯αt−1∥x0∥2
+2(1−¯αt−1)
+
+e
+η(xt)T T0(xt−1)+
+√¯αt−1
+1−¯αt−1
+x0xt−1−A(η(xt,x0))
+eA(η(xt,x0)),
+(35)
+where
+A(η(xt, x0)) := log
+Z
+Rd
+exp
+
+− ∥xt−1∥2
+2(1−¯αt−1)
+
+exp
+
+−1−β t
+2βt
+∥xt−1∥2
+
+e
+η(xt)⊤T0(xt−1)+
+√¯αt−1
+1−¯αt−1
+x⊤
+0 xt−1
+dxt−1.
+(36)
+η(xt, x0) :=
+
+η0(xt)T , xT
+t ,
+√¯αt−1
+1−¯αt−1
+xT
+0
+T
+.(37)
+Now, define
+T(x t−1) := [T0(xt−1)T ,0 T , xT
+t−1].(38)
+3
+
+===== PAGE 4 =====
+Then, we have
+h(xt−1, xt, x0)
+=g(x t, xt−1) exp
+
+− ∥xt−1∥2
+2(1−¯αt−1)
+
+eη(xt,x0)T T(x t−1)−A(η(xt,x0))eA(η(xt,x0)) (39)
+=q ′(xt, xt−1, x0) ˜q(xt−1|xt, x0)e A(η(xt,x0)),(40)
+where
+q′(xt, xt−1, x0) :=Q(x t, xt−1, x0)
+=g(x t, xt−1)·
+1 + 1
+6√n
+Pd
+l=1 ρ3,lH3
+
+xt−1,l−√¯αt−1x0,l√
+1−¯αt−1
+
++O(n −1/2)
+1 + 1
+6√n
+Pd
+l=1 ρ3,lH3
+
+xt,l−√¯αtx0,l√1−¯αt
+
++O(n −1/2)
+,(41)
+and
+˜q(xt−1|xt, x0) := exp
+
+− ∥xt−1∥2
+2(1−¯αt−1)
+
+eη(xt,x0)T T(x t−1)−A(η(xt,x0)).(42)
+Then,˜q(xt−1|xt, x0)belongs to the exponential family givenx t, x0, and
+q(xt−1|xt, x0) =q ′(xt, xt−1, x0) ˜q(xt−1|xt, x0).(43)
+Hence, we have
+log pθ(xt−1|xt)
+q(xt−1|xt, x0) = log pθ(xt−1|xt)
+q′(xt, xt−1, x0) ˜q(xt−1|xt, x0)
+= log pθ(xt−1|xt)
+˜q(xt−1|xt, x0) −logq ′(xt, xt−1, x0).(44)
+Now, choosing
+pθ(xt−1|xt) := exp
+
+− ∥xt−1∥2
+2(1−¯αt−1)
+
+eηθ(xt)T T(x t−1)−A(ηθ(xt)),(45)
+we obtain
+DKL(q(xt−1|xt, x0)∥pθ(xt−1|xt))
+=
+X
+xt−1
+q(xt−1|xt, x0) log q(xt−1|xt, x0)
+pθ(xt−1|xt)
+=
+X
+xt−1
+q′(xt, xt−1, x0) ˜q(xt−1|xt, x0) log q′(xt, xt−1, x0) ˜q(xt−1|xt, x0)
+pθ(xt−1|xt)
+=
+X
+xt−1
+q′˜qlogq′ +
+X
+xt−1
+q′˜qlog ˜q
+pθ
+.(46)
+Assume thatq ′(xt, xt−1, x0)≤Candlogq ′(xt, xt−1, x0)≤C. Then
+X
+xt−1
+q′˜qlogq′ ≤C,(47)
+and
+X
+xt−1
+q′˜qlog ˜q
+pθ
+≤C
+X
+xt−1
+˜q(xt−1|xt, x0) log ˜q(xt−1|xt, x0)
+pθ(xt−1|xt) .(48)
+Therefore,
+DKL(q(xt−1|xt, x0)∥pθ(xt−1|xt))≤C D KL(˜q(xt−1|xt, x0)∥pθ(xt−1|xt)) +C.(49)
+4
+
+===== PAGE 5 =====
+Then, minimizingLreduces to minimizing
+Eq
+
+DKL(q(xT |x0)∥p(xT )) +
+X
+t>1
+DKL(˜q(xt−1|xt, x0)∥pθ(xt−1|xt))−logp θ(x0|x1)
+
+,(50)
+up to multiplicative and additive constants independent ofθ. Observe that
+DKL(˜q(xt−1|xt, x0)∥pθ(xt−1|xt))
+=A(η θ(xt))−A(η(x t, x0))−(η θ(xt)−η(x t, x0))T ∇A(η(xt, x0)).(51)
+From (37) and (38), we have
+η(xt, x0)T T(x t−1) =η 0(xt)T xt−1 +
+√¯αt−1
+1−¯αt−1
+xT
+0 xt−1 (52)
+=
+h
+η0(xt) +
+√¯αt−1
+1−¯αt−1
+x0
+iT
+xt−1.(53)
+Therefore, we define
+˜η(xt, x0) :=η 0(xt) +
+√¯αt−1
+1−¯αt−1
+x0,(54)
+so that
+η(xt, x0)T T(x t−1) = ˜η(xt, x0)T xt−1.(55)
+Next, we express˜η(xt, x0)in terms of the latent variableK t. From the forward process,
+xt = √¯αtx0 +
+√
+1−¯αtKt,(56)
+which implies
+x0 = xt − √1−¯αtKt√¯αt
+.(57)
+Substituting this into˜η(xt, x0)yields
+˜η(xt, x0) =η 0(xt) +
+√¯αt−1
+1−¯αt−1
+· xt − √1−¯αtKt√¯αt
+(58)
+=η 0(xt) +
+√¯αt−1
+(1−¯αt−1)√¯αt
+xt −
+√¯αt−1
+√1−¯αt
+(1−¯αt−1)√¯αt
+Kt.(59)
+Grouping terms, we obtain
+˜η(xt, x0) = ˜ηx(xt)−b tKt,(60)
+where
+˜ηx(xt) :=η 0(xt) +
+√¯αt−1
+(1−¯αt−1)√¯αt
+xt,(61)
+bt :=
+√¯αt−1
+√1−¯αt
+(1−¯αt−1)√¯αt
+.(62)
+From (51), we have
+DKL(˜q(xt−1|xt, x0)∥pθ(xt−1|xt)) =A
+ 
+˜ηx(xt)−b tKθ(xt, t)
+
+−A
+ 
+˜ηx(xt)−b tKt
+
+−
+h 
+˜ηx(xt)−b tKθ(xt, t)
+
+−
+ 
+˜ηx(xt)−b tKt
+iT
+∇A
+ 
+˜ηx(xt)−b tKt
+
+.
+(63)
+Boundedness of the correction termq ′
+D
+In this subsection, we distinguish between the Gaussian case and the non-Gaussian cases. Let
+DNG
+denote the collection of all non-Gaussian distributions considered in this paper.
+5
+
+===== PAGE 6 =====
+Gaussian case.For the Gaussian distribution D= G , the transition density already belongs exactly
+to the exponential family. Hence, no correction term is needed, and we may write
+qG(xt−1 |x t, x0) = ˜qG(xt−1 |x t, x0), q ′
+G(xt, xt−1, x0)≡1.(64)
+Therefore,
+q′
+G(xt, xt−1, x0)≤1,logq ′
+G(xt, xt−1, x0) = 0.(65)
+Non-Gaussian case.For eachD∈ D NG, we write
+qD(xt−1 |x t, x0) =q ′
+D(xt, xt−1, x0) ˜qD(xt−1 |x t, x0),(66)
+where
+q′
+D(xt, xt−1, x0) :=g D(xt, xt−1)· 1 + ∆D
+t−1(xt−1, x0)
+1 + ∆D
+t (xt, x0) .(67)
+Here, gD(xt, xt−1) denotes the distribution-specific prefactor, and ∆D
+t−1,∆ D
+t denote the correspond-
+ing Edgeworth correction terms.
+Accordingly, forD∈ D NG, the Kullback–Leibler divergence can be decomposed as
+DKL(qD(xt−1 |x t, x0)∥p θ(xt−1 |x t))
+=
+Z
+qD(xt−1 |x t, x0) log qD(xt−1 |x t, x0)
+pθ(xt−1 |x t) dxt−1
+=
+Z
+q′
+D(xt, xt−1, x0) ˜qD(xt−1 |x t, x0) log q′
+D(xt, xt−1, x0) ˜qD(xt−1 |x t, x0)
+pθ(xt−1 |x t) dxt−1
+=
+Z
+q′
+D(xt, xt−1, x0) ˜qD(xt−1 |x t, x0) logq ′
+D(xt, xt−1, x0)dx t−1
++
+Z
+q′
+D(xt, xt−1, x0) ˜qD(xt−1 |x t, x0) log ˜qD(xt−1 |x t, x0)
+pθ(xt−1 |x t) dxt−1.(68)
+Lemma.Let K be a compact subset of the interior of the support of the distribution under consider-
+ation. Assume that the Edgeworth remainder is uniform on K, i.e., there exists a constant cK >0
+such that
+sup
+(xt−1,x0)∈K
+|∆D
+t−1(xt−1, x0)|+ sup
+xt∈K
+|∆D
+t (xt, x0)| ≤ cK√n .(69)
+Then, for sufficiently largen, there exists a constantC (R)
+K <∞such that
+1 + ∆D
+t−1(xt−1, x0)
+1 + ∆D
+t (xt, x0) ≤C (R)
+K ,log 1 + ∆D
+t−1(xt−1, x0)
+1 + ∆D
+t (xt, x0) ≤logC (R)
+K .(70)
+Proof.Choosenlarge enough so thatc K/√n≤1/2. Then
+1
+2 ≤1 + ∆ D
+t−1(xt−1, x0),1 + ∆ D
+t (xt, x0)≤ 3
+2 .(71)
+Hence,
+0< 1 + ∆D
+t−1(xt−1, x0)
+1 + ∆D
+t (xt, x0) ≤3.(72)
+Therefore, one may takeC (R)
+K := 3, which yields (70).□
+Proposition.Let D∈ D NG. Suppose that gD(xt, xt−1) is continuous on a compact set KD
+contained in the interior of its support. Then there exists a finite constantC D <∞such that
+q′
+D(xt, xt−1, x0)≤C D,logq ′
+D(xt, xt−1, x0)≤C D,(73)
+for all(x t, xt−1, x0)∈ K D.
+6
+
+===== PAGE 7 =====
+Proof.Sinceg D is continuous on the compact setK D, the Weierstrass theorem implies that
+MD := sup
+(xt,xt−1)∈KD
+gD(xt, xt−1)<∞.(74)
+Combining this with (70), we obtain
+q′
+D(xt, xt−1, x0) =g D(xt, xt−1)· 1 + ∆D
+t−1(xt−1, x0)
+1 + ∆D
+t (xt, x0)
+≤M D C(R)
+KD .(75)
+Hence,
+logq ′
+D(xt, xt−1, x0)≤log
+ 
+MD C(R)
+KD
+
+.(76)
+Therefore, it suffices to choose
+CD := max
+n
+MD C(R)
+KD ,log
+ 
+MD C(R)
+KD
+o
+<∞.(77)
+This proves (73).□
+Corollary.For every distribution D, Gaussian or non-Gaussian, there exists a finite constant
+CD <∞such that, on the corresponding compact setK D,
+q′
+D(xt, xt−1, x0)≤C D,logq ′
+D(xt, xt−1, x0)≤C D.(78)
+Consequently, forD∈ D NG, (68) yields
+DKL(qD(xt−1 |x t, x0)∥p θ(xt−1 |x t))
+≤C D +C D
+Z
+˜qD(xt−1 |x t, x0)
+log ˜qD(xt−1 |x t, x0)
+pθ(xt−1 |x t)
+ dxt−1,(79)
+while in the Gaussian caseq ′
+G ≡1, so the correction term disappears identically.
+Metropolis–Hastings Sampling
+At timestept, we introduce the latent state
+z:=x t−1,(80)
+and define the target distribution
+πt(z) :=p θ(z|x t, Kt).(81)
+We use a symmetric Gaussian random-walk proposal
+rt(z′ |z)∝exp
+
+− ∥z′ −z∥ 2
+2
+
+,(82)
+so that
+rt(z′ |z) =r t(z|z ′).(83)
+Hence, the Metropolis–Hastings acceptance probability is
+αt(z, z′) = min
+
+1, πt(z′)r t(z|z ′)
+πt(z)r t(z′ |z)
+
+= min
+
+1, pθ(z′ |x t, Kt)
+pθ(z|x t, Kt)
+
+.(84)
+Next, using
+Kt = Vt√1−¯αt
+,(85)
+the forward relation
+xt = √¯αt x0 +
+√
+1−¯αt Kt (86)
+7
+
+===== PAGE 8 =====
+implies
+x0 = xt − √1−¯αt Kt√¯αt
+.(87)
+Therefore, the natural parameter can be rewritten as
+ηθ(xt, x0) =η θ
+
+xt, xt − √1−¯αt Kt√¯αt
+
+.(88)
+For simplicity, we denote
+eηθ(xt, Kt) :=η θ
+
+xt, xt − √1−¯αt Kt√¯αt
+
+.(89)
+Under the exponential-family parameterization, the reverse density is
+pθ(z|x t, Kt) = exp
+
+− ∥z∥2
+2(1−¯αt−1)
+
+exp
+ 
+eηθ(xt, Kt)T T(z)−A(eη θ(xt, Kt))
+
+.(90)
+Hence,
+pθ(z′ |x t, Kt)
+pθ(z|x t, Kt) =
+exp
+
+− ∥z′∥2
+2(1−¯αt−1)
+
+exp
+ 
+eηθ(xt, Kt)T T(z ′)
+
+exp
+
+− ∥z∥2
+2(1−¯αt−1)
+
+exp(eηθ(xt, Kt)T T(z))
+,(91)
+since the log-partition term
+A(eηθ(xt, Kt))(92)
+cancels in the ratio.
+Therefore,
+αt(z, z′) = min
+
+
+1,
+exp
+
+− ∥z′∥2
+2(1−¯αt−1)
+
+exp
+ 
+eηθ(xt, Kt)T T(z ′)
+
+exp
+
+− ∥z∥2
+2(1−¯αt−1)
+
+exp(eηθ(xt, Kt)T T(z))
+
+
+ .(93)
+Starting from an initial state z(0), the Metropolis–Hastings chain is generated as follows. At iteration
+m, propose
+z′ ∼r t(· |z (m)),(94)
+and update
+z(m+1) =
+z′,with probabilityα t(z(m), z′),
+z(m),otherwise. (95)
+AfterMiterations, we take
+xt−1 =z (M) .(96)
+This procedure is repeated sequentially for t=T, T−1, . . . ,1 to generate the full reverse trajectory.
+3 Some common exponential distributions
+3.1 Gaussian Distribution
+Let ε1, ε2,· · ·, ε T be a sequence of i.i.d. random vectors with mean µ= 0 and covariance I. Then,
+we have
+q(xt|xt−1) = 1
+(√βt)d PE
+ xt − √1−β txt−1 + √βtµ√βt
+
+(97)
+= 1
+(√βt)d exp
+
+− ∥xt − √1−β txt−1∥2
+2βt
+
+(98)
+= 1
+(√βt)d exp
+
+− ∥xt∥2
+2βt
+
+exp
+
+− 1−β t
+2βt
+∥xt−1∥2
+
+exp
+
+−
+√1−β t
+βt
+xT
+t xt−1
+
+.
+(99)
+8
+
+===== PAGE 9 =====
+Hence, we can set
+g(xt, xt−1) = 1
+(√βt)d exp
+
+− ∥xt∥2
+2βt
+
+exp
+
+− 1−β t
+2βt
+∥xt−1∥2
+
+,(100)
+η0(xt) =
+√1−β t
+βt
+xt,(101)
+T0(xt−1) =x t−1,(102)
+A0(η0(xt)) = 0.(103)
+Then, from (37) and (38) we also have
+η(xt, x0) =
+ √1−β t
+βt
+xT
+t , xT
+t ,
+√¯αt−1
+1−¯αt−1
+xT
+0
+T
+,(104)
+T(x t−1) = [xT
+t−1,0 T , xT
+t−1]T .(105)
+It follows that
+η(xt, x0)T T(x t−1) =
+ √1−β t
+βt
+xt +
+√¯αt−1
+1−¯αt−1
+x0
+T
+xt−1.(106)
+Hence, by (36) we obtain
+A(η(xt, x0)) =A(˜η(xt, x0))
+= log
+Z
+Rd
+exp
+
+− ∥xt−1∥2
+2(1−¯αt−1)
+
+exp
+
+−1−β t
+2βt
+∥xt−1∥2
+
+exp
+ 
+˜η(xt, x0)T xt−1
+
+dxt−1
+= log
+Z
+Rd
+exp
+
+−
+1−β t
+2βt
++ 1
+2(1−¯αt−1)
+
+∥xt−1∥2 + ˜η(xt, x0)T xt−1
+
+dxt−1
+= log
+Z
+Rd
+exp
+ 
+−
+1−β t
+2βt
++ 1
+2(1−¯αt−1)
+
+∥xt−1∥2 +
+ √1−β t
+βt
+xt +
+√¯αt−1
+1−¯αt−1
+x0
+T
+xt−1
+!
+dxt−1.
+(107)
+where
+˜η(xt, x0) :=
+√1−β t
+βt
+xt +
+√¯αt−1
+1−¯αt−1
+x0.(108)
+Now, it is know that Z
+Rd
+exp
+
+− ∥x−µ∥ 2
+2σ2
+
+dx= (
+√
+2πσ2)d (109)
+for anyµ∈R d, σ∈R. Hence, from (107) we obtain
+A(˜η(xt, x0)) = log
+
+(
+q
+2πσ2
+t )d
+
++ σ2
+t
+2 ∥˜η(xt, x0)∥2,(110)
+where
+σ2
+t = 1
+αt
+βt
++ 1
+1−¯αt−1
+= βt(1−¯αt−1)
+1−¯αt
+,(111)
+˜η(xt, x0) =
+√αt
+βt
+xt +
+√¯αt−1
+1−¯αt−1
+x0.(112)
+Define
+˜µt(xt, x0) :=σ 2
+t ˜η(xt, x0)
+= βt(1−¯αt−1)
+1−¯αt
+ √1−β t
+βt
+xt +
+√¯αt−1
+1−¯αt−1
+x0
+
+=
+√1−β t(1−¯αt−1)
+1−¯αt
+xt + βt
+√¯αt−1
+1−¯αt
+x0.(113)
+9
+
+===== PAGE 10 =====
+and
+µθ(xt, t) :=σ 2
+t ηθ(xt), σ 2
+t = βt(1−¯αt−1)
+1−¯αt
+.(114)
+Then, from (51) we obtain
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))
+=A(η θ(xt))−A(˜η(xt, x0))−(η θ(xt)−˜η(xt, x0))T ∇A(˜η(xt, x0))(115)
+= σ2
+t
+2
+
+∥ηθ(xt)∥2 − ∥˜η(xt, x0)∥2 −2(η θ(xt)−˜η(xt, x0))T ˜η(xt, x0)
+
+= σ2
+t
+2
+ηθ(xt)−˜η(xt, x0)
+2
+,(116)
+Now, since˜q(xt−1|xt, x0)andp θ(xt−1|xt)belong to the exponential family givenx t, x0, hence
+σ2
+t ˜η(xt, x0) =∇A(˜η(xt, x0)) = ˜µt(xt, x0),(117)
+σ2
+t ηθ(xt) =∇A(η θ(xt)) =µ θ(xt, t),(118)
+where ˜µt(xt, x0) is the mean of X∼˜q(x t−1|xt, x0), and µθ(xt, t) is the mean of X∼p θ(xt−1|xt)
+givenx t, x0. Then, from (116) we obtain
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))
+= ∥˜µt(xt, x0)−µ θ(xt, t)∥2
+2
+2σ2
+t
+.(119)
+where
+σ2
+t = βt(1−¯αt−1)
+1−¯αt
+.
+by (111).
+Next, we express˜η(xt, x0)in terms of the latent variableK t. From the forward process,
+xt = √¯αt x0 +
+√
+1−¯αt Kt,(120)
+which implies
+x0 = xt − √1−¯αt Kt√¯αt
+.(121)
+Substituting this into the definition of˜η(xt, x0)gives
+˜η(xt, x0) =η 0(xt) +
+√¯αt−1
+1−¯αt−1
+x0
+=η 0(xt) +
+√¯αt−1
+1−¯αt−1
+· xt − √1−¯αt Kt√¯αt
+=η 0(xt) +
+√¯αt−1
+(1−¯αt−1)√¯αt
+xt −
+√¯αt−1
+√1−¯αt
+(1−¯αt−1)√¯αt
+Kt.(122)
+Using¯αt =α t ¯αt−1 and
+η0(xt) =
+√1−β t
+βt
+xt =
+√αt
+βt
+xt,
+we further obtain
+˜η(xt, x0) =
+ √αt
+βt
++ 1
+(1−¯αt−1)√αt
+
+xt −
+√1−¯αt
+(1−¯αt−1)√αt
+Kt
+= 1−¯αt
+βt(1−¯αt−1)√αt
+xt −
+√1−¯αt
+(1−¯αt−1)√αt
+Kt.(123)
+10
+
+===== PAGE 11 =====
+Therefore, we can write
+˜η(xt, x0) = ˜ηx(xt)−b tKt,(124)
+where
+˜ηx(xt) := 1−¯αt
+βt(1−¯αt−1)√αt
+xt,(125)
+bt :=
+√1−¯αt
+(1−¯αt−1)√αt
+.(126)
+We have
+ηθ(xt) = ˜ηx(xt)−b tKθ(xt, t),(127)
+Substituting˜η(xt, x0) = ˜ηx(xt)−b tKt andη θ(xt) = ˜ηx(xt)−b tKθ(xt, t)into (116), we obtain
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))
+= σ2
+t
+2 ∥ηθ(xt)−˜η(xt, x0)∥2
+= σ2
+t
+2
+ 
+˜ηx(xt)−b tKθ(xt, t)
+
+−
+ 
+˜ηx(xt)−b tKt
+2
+= σ2
+t b2
+t
+2 ∥Kθ(xt, t)−K t∥2 .(128)
+Since
+σ2
+t = βt(1−¯αt−1)
+1−¯αt
+, b t =
+√1−¯αt
+(1−¯αt−1)√αt
+,(129)
+it follows that
+σ2
+t b2
+t = βt
+αt(1−¯αt−1) .(130)
+Hence,
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))
+= βt
+2αt(1−¯αt−1) ∥Kθ(xt, t)−K t∥2 .(131)
+3.2 Exponential Distribution
+Let ε1, ε2,· · ·, ε T be a sequence of i.i.d. random vectors such that each component of εt follows an
+exponential distribution with rateλ. Then,
+PE(x) =
+dY
+l=1
+λe−λxl 1{xl ≥0}
+=λ d exp(−λ1T x)1{x≥0}, x∈R d.(132)
+Hence,
+q(xt|xt−1) = 1
+(√βt)d PE
+ xt − √1−β t xt−1 + √βt 1
+λ 1√βt
+
+= λd
+(√βt)d exp
+ 
+− λ√βt
+1T xt +λ
+s
+1−β t
+βt
+1T xt−1 −d
+!
+×1
+
+xt−1 ≤ xt + 1
+λ
+√βt1√1−β t
+
+.(133)
+11
+
+===== PAGE 12 =====
+Therefore, we set
+g(xt, xt−1) = λd
+(√βt)d exp
+
+− λ√βt
+1T xt −d
+
+1
+
+xt−1 ≤ xt + 1
+λ
+√βt1√1−β t
+
+,(134)
+η0(xt) =λ
+s
+1−β t
+βt
+1=λ
+r αt
+βt
+1,(135)
+T0(xt−1) =x t−1,(136)
+A0(η0(xt)) = 0.(137)
+Then, from (37) and (38), we define
+˜η(xt, x0) :=η 0(xt) +
+√¯αt−1
+1−¯αt−1
+x0,(138)
+so that
+η(xt, x0)T T(x t−1) = ˜η(xt, x0)T xt−1.(139)
+Hence, by (36) we obtain
+A(η(xt, x0)) =A(˜η(xt, x0))
+= log
+Z
+Rd
+exp
+
+− ∥xt−1∥2
+2(1−¯αt−1)
+
+exp
+
+−1−β t
+2βt
+∥xt−1∥2
+
+exp
+ 
+˜η(xt, x0)⊤xt−1
+
+dxt−1
+= log
+Z
+Rd
+exp
+
+−1
+2
+ 1
+1−¯αt−1
++ 1−β t
+βt
+
+∥xt−1∥2 + ˜η(xt, x0)⊤xt−1
+
+dxt−1.
+(140)
+Now, define
+σ2
+t := 1
+1
+1−¯αt−1
++ 1−βt
+βt
+= βt(1−¯αt−1)
+1−¯αt
+.(141)
+Then (140) becomes
+A(˜η(xt, x0)) = log
+Z
+Rd
+exp
+
+− 1
+2σ2
+t
+∥xt−1∥2 + ˜η(xt, x0)⊤xt−1
+
+dxt−1
+= log
+Z
+Rd
+exp
+
+− 1
+2σ2
+t
+∥xt−1 −σ 2
+t ˜η(xt, x0)∥2 + σ2
+t
+2 ∥˜η(xt, x0)∥2
+
+dxt−1
+= log
+
+(
+q
+2πσ2
+t )d
+
++ σ2
+t
+2 ∥˜η(xt, x0)∥2.(142)
+Therefore,
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))
+=A(η θ(xt, t))−A(˜η(xt, x0))−(η θ(xt, t)−˜η(xt, x0))⊤∇A(˜η(xt, x0))
+= σ2
+t
+2
+ηθ(xt, t)−˜η(xt, x0)
+2
+,(143)
+Next, we express˜η(xt, x0)in terms of the latent variableK t. From the forward process,
+xt = √¯αt x0 +
+√
+1−¯αt Kt,(144)
+which implies
+x0 = xt − √1−¯αt Kt√¯αt
+.(145)
+12
+
+===== PAGE 13 =====
+Substituting this into˜η(xt, x0)gives
+˜η(xt, x0) =η 0(xt) +
+√¯αt−1
+1−¯αt−1
+· xt − √1−¯αt Kt√¯αt
+=η 0(xt) + 1
+(1−¯αt−1)√αt
+xt −
+√1−¯αt
+(1−¯αt−1)√αt
+Kt.(146)
+Hence,
+˜η(xt, x0) = ˜ηx(xt)−b tKt,(147)
+where
+˜ηx(xt) :=λ
+r αt
+βt
+1+ 1
+(1−¯αt−1)√αt
+xt,(148)
+bt :=
+√1−¯αt
+(1−¯αt−1)√αt
+.(149)
+We parameterize the model natural parameter in the same form:
+ηθ(xt, t) = ˜ηx(xt)−b tKθ(xt, t),(150)
+Substituting ˜η(xt, x0) = ˜ηx(xt)−b tKt and ηθ(xt, t) = ˜ηx(xt)−b tKθ(xt, t) into (143), we obtain
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))
+= σ2
+t
+2 ∥(˜ηx(xt)−b tKθ(xt, t))−(˜ηx(xt)−b tKt)∥2
+= σ2
+t b2
+t
+2 ∥Kθ(xt, t)−K t∥2.(151)
+Since
+σ2
+t b2
+t = βt(1−¯αt−1)
+1−¯αt
+· 1−¯αt
+αt(1−¯αt−1)2
+= βt
+αt(1−¯αt−1) ,(152)
+it follows that
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t)) = βt
+2αt(1−¯αt−1) ∥Kθ(xt, t)−K t∥2.(153)
+Therefore, a natural training objective is
+˜L=E q
+
+DKL(q(xT |x0)∥p(xT )) +
+X
+t>1
+βt
+2αt(1−¯αt−1) ∥Kθ(xt, t)−K t∥2 −logp θ(x0|x1)
+
+.
+(154)
+3.3 Laplace Distribution
+Consider the zero-mean Laplace distribution
+p(x) = 1
+2b exp
+
+− |x|
+b
+
+, b >0.
+Using the Gaussian scale mixture (GSM) representation, we introduce a latent variance
+v∼Exp
+ 1
+2b2
+
+,
+such that, conditioned onv, the Laplace variable becomes Gaussian:
+x|v∼ N(0, v).
+13
+
+===== PAGE 14 =====
+Therefore, conditioned onv, the forward transition is Gaussian with varianceβ tv:
+q(xt |x t−1, v) = 1
+(√2πβtv)d exp
+
+− ∥xt − √1−β t xt−1∥2
+2βtv
+
+.(155)
+Expanding the quadratic term gives
+q(xt |x t−1, v) = 1
+(√2πβtv)d exp
+
+− ∥xt∥2
+2βtv
+
+exp
+
+−1−β t
+2βtv ∥xt−1∥2
+
+exp
+ √1−β t
+βtv xT
+t xt−1
+
+.
+(156)
+Hence, we can set
+g(xt, xt−1, v) = 1
+(√2πβtv)d exp
+
+− ∥xt∥2
+2βtv
+
+exp
+
+−1−β t
+2βtv ∥xt−1∥2
+
+,(157)
+η0(xt, v) =
+√1−β t
+βtv xt,(158)
+T0(xt−1) =x t−1,(159)
+A0(η0(xt, v)) = 0.(160)
+We define
+˜η(xt, x0, v) :=η 0(xt, v) +
+√¯αt−1
+1−¯αt−1
+x0 =
+√1−β t
+βtv xt +
+√¯αt−1
+1−¯αt−1
+x0,(161)
+so that
+η(xt, x0, v)T T(x t−1) = ˜η(xt, x0, v)T xt−1.(162)
+Hence, by (36) we obtain
+A(˜η(xt, x0, v)) = log
+Z
+Rd
+exp
+
+−
+1−β t
+2βtv + 1
+2(1−¯αt−1)
+
+∥xt−1∥2 + ˜η(xt, x0, v)T xt−1
+
+dxt−1.
+(163)
+Using the Gaussian integral identity, we obtain
+A(˜η(xt, x0, v)) = log
+
+(
+q
+2πσ2
+t,v)d
+
++ σ2
+t,v
+2 ∥˜η(xt, x0, v)∥2,(164)
+where
+σ2
+t,v = 1
+1−βt
+βtv + 1
+1−¯αt−1
+= βtv(1−¯αt−1)
+1−¯αt + (v−1)(1−β t)(1−¯αt−1) .(165)
+Define
+˜µt(xt, x0, v) :=σ 2
+t,v ˜η(xt, x0, v),(166)
+µθ(xt, t, v) :=σ 2
+t,v ηθ(xt, v).(167)
+Then, from (51), we obtain
+DKL(˜q(xt−1 |x t, x0, v)∥p θ(xt−1 |x t, v))
+=A(η θ(xt, v))−A(˜η(xt, x0, v))−(η θ(xt, v)−˜η(xt, x0, v))T ∇A(˜η(xt, x0, v))
+= σ2
+t,v
+2 ∥ηθ(xt, v)−˜η(xt, x0, v)∥2 (168)
+= ∥˜µt(xt, x0, v)−µ θ(xt, t, v)∥2
+2σ2
+t,v
+.(169)
+Next, we express˜η(xt, x0, v)in terms of the latent variableK t. From the forward process,
+xt = √¯αt x0 +
+√
+1−¯αt Kt,(170)
+14
+
+===== PAGE 15 =====
+which implies
+x0 = xt − √1−¯αt Kt√¯αt
+.(171)
+Substituting this into (161) yields
+˜η(xt, x0, v) =η 0(xt, v) +
+√¯αt−1
+1−¯αt−1
+· xt − √1−¯αt Kt√¯αt
+=η 0(xt, v) + 1
+(1−¯αt−1)√αt
+xt −
+√1−¯αt
+(1−¯αt−1)√αt
+Kt.(172)
+Therefore, we can write
+˜η(xt, x0, v) = ˜ηx(xt, v)−b tKt,(173)
+where
+˜ηx(xt, v) :=
+√1−β t
+βtv xt + 1
+(1−¯αt−1)√αt
+xt,(174)
+bt :=
+√1−¯αt
+(1−¯αt−1)√αt
+.(175)
+We parameterize the model natural parameter in the same form:
+ηθ(xt, v) = ˜ηx(xt, v)−b tKθ(xt, t, v).(176)
+Substituting this and˜η(xt, x0, v) = ˜ηx(xt, v)−b tKt into (168), we obtain
+DKL(˜q(xt−1 |x t, x0, v)∥p θ(xt−1 |x t, v))
+= σ2
+t,vb2
+t
+2 ∥Kθ(xt, t, v)−K t∥2.(177)
+Therefore, conditioned onv, the denoising objective can be written as
+LGSM
+t (θ)∝E x0,xt,v
+"
+σ2
+t,vb2
+t
+2 ∥Kθ(xt, t, v)−K t∥2
+#
+.(178)
+3.4 Gamma Distribution
+Let ε1, ε2, . . . , εT be a sequence of i.i.d. random vectors, where each component follows a Gamma
+distribution with shapek >0and rateλ >0. Let
+µ= k
+λ ,
+and define the forward process
+xt = √αt xt−1 +
+p
+βt (εt −µ), α t = 1−β t.(179)
+Then,
+q(xt |x t−1) = 1
+(√βt)d Pε
+ xt − √αtxt−1 + √βtµ√βt
+
+(180)
+where
+Pε(z) =
+dY
+i=1
+λk
+Γ(k) zk−1
+i e−λzi 1{zi>0}.(181)
+Ignoring the global normalizing constant depending only on(k, λ), we obtain
+q(xt |x t−1)∝ 1
+(√βt)d
+dY
+i=1
+z k−1
+t,i exp(−λzt,i)1{zt,i>0} (182)
+15
+
+===== PAGE 16 =====
+where
+zt = xt − √αtxt−1 + √βtµ√βt
+=a t −b txt−1,(183)
+with
+at = xt + √βtµ√βt
+, b t =
+r αt
+βt
+.(184)
+Hence,
+q(xt |x t−1) =g(x t, xt−1) exp
+ 
+η0(xt)T T0(xt−1)
+
+(185)
+where
+g(xt, xt−1) = 1
+(√βt)d
+dY
+i=1
+(at,i −b txt−1,i)k−1 exp(−λat,i)1{xt−1,i≤ct,i} (186)
+η0(xt) =λb t 1=λ
+r αt
+βt
+1(187)
+T0(xt−1) =x t−1 (188)
+A0(η0(xt)) = 0.(189)
+Then, we define
+˜η(xt, x0) :=η 0(xt) +
+√¯αt−1
+1−¯αt−1
+x0 =λ
+r αt
+βt
+1+
+√¯αt−1
+1−¯αt−1
+x0 (190)
+so that
+η(xt, x0)T T(x t−1) = ˜η(xt, x0)T xt−1.(191)
+For the Gamma distribution, we use the same log-partition form as above. Hence,
+A(η(xt, x0)) =A(˜η(xt, x0))
+= log
+Z
+Rd
+exp
+
+− ∥xt−1∥2
+2(1−¯αt−1)
+
+exp
+
+−1−β t
+2βt
+∥xt−1∥2
+
+exp
+ 
+˜η(xt, x0)T xt−1
+
+dxt−1.
+(192)
+Equivalently,
+A(˜η(xt, x0)) = log
+Z
+Rd
+exp
+
+−1
+2
+ 1
+1−¯αt−1
++ 1−β t
+βt
+
+∥xt−1∥2 + ˜η(xt, x0)T xt−1
+
+dxt−1.
+(193)
+Define
+σ2
+t := 1
+1
+1−¯αt−1
++ 1−βt
+βt
+= βt(1−¯αt−1)
+1−¯αt
+.(194)
+Then, using the Gaussian integral identity, we obtain
+A(˜η(xt, x0)) = log
+
+(
+q
+2πσ2
+t )d
+
++ σ2
+t
+2 ∥˜η(xt, x0)∥2.(195)
+Therefore,
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))
+=A(η θ(xt, t))−A(˜η(xt, x0))−(η θ(xt, t)−˜η(xt, x0))T ∇A(˜η(xt, x0))
+= σ2
+t
+2 ∥ηθ(xt, t)−˜η(xt, x0)∥2 .(196)
+16
+
+===== PAGE 17 =====
+Next, we express˜η(xt, x0)in terms of the latent variableK t. From the forward process,
+xt = √¯αt x0 +
+√
+1−¯αt Kt (197)
+which implies
+x0 = xt − √1−¯αt Kt√¯αt
+.(198)
+Substituting this into˜η(xt, x0)gives
+˜η(xt, x0) =η 0(xt) +
+√¯αt−1
+1−¯αt−1
+· xt − √1−¯αt Kt√¯αt
+=η 0(xt) + 1
+(1−¯αt−1)√αt
+xt −
+√1−¯αt
+(1−¯αt−1)√αt
+Kt.(199)
+Therefore, we can write
+˜η(xt, x0) = ˜ηx(xt)−b tKt (200)
+where
+˜ηx(xt) :=η 0(xt) + 1
+(1−¯αt−1)√αt
+xt,(201)
+bt :=
+√1−¯αt
+(1−¯αt−1)√αt
+.(202)
+We parameterize the model natural parameter in the same form:
+ηθ(xt, t) = ˜ηx(xt)−b tKθ(xt, t),(203)
+Substituting ˜η(xt, x0) = ˜ηx(xt)−b tKt and ηθ(xt, t) = ˜ηx(xt)−b tKθ(xt, t) into (196), we obtain
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))
+= σ2
+t
+2 ∥(˜ηx(xt)−b tKθ(xt, t))−(˜ηx(xt)−b tKt)∥2
+= σ2
+t b2
+t
+2 ∥Kθ(xt, t)−K t∥2.(204)
+Since
+σ2
+t b2
+t = βt(1−¯αt−1)
+1−¯αt
+· 1−¯αt
+αt(1−¯αt−1)2
+= βt
+αt(1−¯αt−1) ,(205)
+it follows that
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t)) = βt
+2αt(1−¯αt−1) ∥Kθ(xt, t)−K t∥2.(206)
+Therefore, a natural training objective is
+˜L=E q
+
+DKL(q(xT |x 0)∥p(xT )) +
+X
+t>1
+βt
+2αt(1−¯αt−1) ∥Kθ(xt, t)−K t∥2 −logp θ(x0 |x 1)
+
+.
+3.5 Beta Distribution
+Let ε1, ε2, . . . , εT be a sequence of i.i.d. random vectors such that each coordinate followsBeta(α, β),
+applied component-wise, with mean
+µ= α
+α+β ∈(0,1).
+17
+
+===== PAGE 18 =====
+For a fixed variance schedule(β t)T
+t=1 withα t = 1−β t, we define the forward process
+xt = √αt xt−1 +
+p
+βt (εt −µ1).(207)
+Then,
+q(xt |x t−1) = 1
+(√βt)d Pε
+ xt − √αtxt−1 + √βtµ1√βt
+
+,(208)
+where
+Pε(z)∝
+dY
+i=1
+zα−1
+i (1−z i)β−11{0<zi<1}.(209)
+Hence,
+q(xt |x t−1)∝ 1
+(√βt)d
+dY
+i=1
+zα−1
+t,i (1−z t,i)β−11{0<zt,i<1},(210)
+where
+zt = xt − √αtxt−1 + √βtµ1√βt
+=a t −b txt−1,(211)
+with
+at = xt + √βtµ1√βt
+, b t =
+r αt
+βt
+.(212)
+Equivalently,
+q(xt |x t−1)∝ 1
+(√βt)d
+dY
+i=1
+(at,i −b txt−1,i)α−1(1−a t,i +b txt−1,i)β−11{ℓt,i<xt−1,i<ut,i},
+(213)
+where
+ℓt,i = at,i −1
+bt
+, u t,i = at,i
+bt
+.(214)
+We write
+q(xt |x t−1) =g B(xt, xt−1) exp
+ 
+η0(xt)T T0(xt−1)
+
+,(215)
+where
+gB(xt, xt−1) = 1
+(√βt)d
+dY
+i=1
+(at,i −b txt−1,i)α−1(1−a t,i +b txt−1,i)β−11{ℓt,i<xt−1,i<ut,i},
+(216)
+η0(xt) = 0,(217)
+T0(xt−1) =x t−1,(218)
+A0(η0(xt)) = 0.(219)
+Then, we define
+˜η(xt, x0) :=η 0(xt) +
+√¯αt−1
+1−¯αt−1
+x0 =
+√¯αt−1
+1−¯αt−1
+x0,(220)
+so that
+η(xt, x0)T T(x t−1) = ˜η(xt, x0)T xt−1.(221)
+18
+
+===== PAGE 19 =====
+For the Beta distribution, we use the same log-partition form as above. Hence,
+A(η(xt, x0)) =A(˜η(xt, x0))(222)
+= log
+Z
+Rd
+exp
+
+− ∥xt−1∥2
+2(1−¯αt−1)
+
+exp
+
+−1−β t
+2βt
+∥xt−1∥2
+
+exp
+ 
+˜η(xt, x0)T xt−1
+
+dxt−1.
+(223)
+Equivalently,
+A(˜η(xt, x0)) = log
+Z
+Rd
+exp
+
+−1
+2
+ 1
+1−¯αt−1
++ 1−β t
+βt
+
+∥xt−1∥2 + ˜η(xt, x0)T xt−1
+
+dxt−1.
+(224)
+Define
+σ2
+t := 1
+1
+1−¯αt−1
++ 1−βt
+βt
+= βt(1−¯αt−1)
+1−¯αt
+.(225)
+Using the Gaussian integral identity, we obtain
+A(˜η(xt, x0)) = log
+
+(
+q
+2πσ2
+t )d
+
++ σ2
+t
+2 ∥˜η(xt, x0)∥2.(226)
+Therefore,
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))(227)
+=A(η θ(xt, t))−A(˜η(xt, x0))−(η θ(xt, t)−˜η(xt, x0))T ∇A(˜η(xt, x0))(228)
+= σ2
+t
+2 ∥ηθ(xt, t)−˜η(xt, x0)∥2 .(229)
+Next, we express˜η(xt, x0)in terms of the latent variableK t. From the forward process,
+xt = √¯αt x0 +
+√
+1−¯αt Kt,(230)
+which implies
+x0 = xt − √1−¯αt Kt√¯αt
+.(231)
+Substituting this into˜η(xt, x0)gives
+˜η(xt, x0) =
+√¯αt−1
+1−¯αt−1
+· xt − √1−¯αt Kt√¯αt
+(232)
+= 1
+(1−¯αt−1)√αt
+xt −
+√1−¯αt
+(1−¯αt−1)√αt
+Kt.(233)
+Therefore, we can write
+˜η(xt, x0) = ˜ηx(xt)−b tKt,(234)
+where
+˜ηx(xt) = 1
+(1−¯αt−1)√αt
+xt,(235)
+bt =
+√1−¯αt
+(1−¯αt−1)√αt
+.(236)
+We parameterize the model natural parameter in the same form:
+ηθ(xt, t) = ˜ηx(xt)−b tKθ(xt, t),(237)
+19
+
+===== PAGE 20 =====
+Substituting ˜η(xt, x0) = ˜ηx(xt)−b tKt and ηθ(xt, t) = ˜ηx(xt)−b tKθ(xt, t) into (229), we obtain
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))(238)
+= σ2
+t
+2 ∥(˜ηx(xt)−b tKθ(xt, t))−(˜ηx(xt)−b tKt)∥2 (239)
+= σ2
+t b2
+t
+2 ∥Kθ(xt, t)−K t∥2.(240)
+Since
+σ2
+t b2
+t = βt(1−¯αt−1)
+1−¯αt
+· 1−¯αt
+αt(1−¯αt−1)2 (241)
+= βt
+αt(1−¯αt−1) ,(242)
+it follows that
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t)) = βt
+2αt(1−¯αt−1) ∥Kθ(xt, t)−K t∥2.(243)
+Therefore, a natural training objective is
+˜L=E q
+
+DKL(q(xT |x 0)∥p(xT )) +
+X
+t>1
+βt
+2αt(1−¯αt−1) ∥Kθ(xt, t)−K t∥2 −logp θ(x0 |x 1)
+
+.
+3.6 Chi-square Distribution
+Let ε1, ε2, . . . , εT be a sequence of i.i.d. random vectors such that each coordinate is distributed as
+χ2
+ν, applied component-wise, with mean
+µ=E[χ 2
+ν] =ν >0.
+For a fixed variance schedule(β t)T
+t=1 withα t = 1−β t, we define the forward process
+xt = √αt xt−1 +
+p
+βt (εt −µ1).(244)
+Then,
+q(xt |x t−1) = 1
+(√βt)d Pε
+ xt − √αtxt−1 + √βtµ1√βt
+
+,(245)
+where
+Pε(z)∝
+dY
+i=1
+zν/2−1
+i exp(−zi/2)1{zi>0}.(246)
+Hence,
+q(xt |x t−1)∝ 1
+(√βt)d
+dY
+i=1
+z ν/2−1
+t,i exp(−zt,i/2)1 {zt,i>0},(247)
+where
+zt = xt − √αtxt−1 + √βtµ1√βt
+=a t −b txt−1,(248)
+with
+at = xt + √βtµ1√βt
+, b t =
+r αt
+βt
+.(249)
+20
+
+===== PAGE 21 =====
+Therefore,
+q(xt |x t−1) = 1
+(√βt)d
+dY
+i=1
+(at,i −b txt−1,i)ν/2−1 exp
+
+− 1
+2(at,i −b txt−1,i)
+
+1{at,i−btxt−1,i>0}
+(250)
+= 1
+(√βt)d exp
+
+− 1
+2 1T at
+ dY
+i=1
+(at,i −b txt−1,i)ν/2−11{at,i−btxt−1,i>0} exp
+
+1
+2 bt1T xt−1
+
+.
+(251)
+Thus, we write
+q(xt |x t−1) =g χ2(xt, xt−1) exp
+ 
+η0(xt)T T0(xt−1)
+
+,(252)
+where
+gχ2(xt, xt−1) = 1
+(√βt)d exp
+
+− 1
+2 1T at
+ dY
+i=1
+(at,i −b txt−1,i)ν/2−11{at,i−btxt−1,i>0},(253)
+η0(xt) = bt
+2 1= 1
+2
+r αt
+βt
+1,(254)
+T0(xt−1) =x t−1,(255)
+A0(η0(xt)) = 0.(256)
+Then, we define
+˜η(xt, x0) :=η 0(xt) +
+√¯αt−1
+1−¯αt−1
+x0 (257)
+= 1
+2
+r αt
+βt
+1+
+√¯αt−1
+1−¯αt−1
+x0,(258)
+so that
+η(xt, x0)T T(x t−1) = ˜η(xt, x0)T xt−1.(259)
+For the chi-square distribution, we use the same log-partition form as above. Hence,
+A(η(xt, x0)) =A(˜η(xt, x0))(260)
+= log
+Z
+Rd
+exp
+
+− ∥xt−1∥2
+2(1−¯αt−1)
+
+exp
+
+−1−β t
+2βt
+∥xt−1∥2
+
+exp
+ 
+˜η(xt, x0)T xt−1
+
+dxt−1.
+(261)
+Equivalently,
+A(˜η(xt, x0)) = log
+Z
+Rd
+exp
+
+−1
+2
+ 1
+1−¯αt−1
++ 1−β t
+βt
+
+∥xt−1∥2 + ˜η(xt, x0)T xt−1
+
+dxt−1.
+(262)
+Define
+σ2
+t := 1
+1
+1−¯αt−1
++ 1−βt
+βt
+= βt(1−¯αt−1)
+1−¯αt
+.(263)
+Using the Gaussian integral identity, we obtain
+A(˜η(xt, x0)) = log
+
+(
+q
+2πσ2
+t )d
+
++ σ2
+t
+2 ∥˜η(xt, x0)∥2.(264)
+Therefore,
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))(265)
+=A(η θ(xt, t))−A(˜η(xt, x0))−(η θ(xt, t)−˜η(xt, x0))T ∇A(˜η(xt, x0))(266)
+= σ2
+t
+2 ∥ηθ(xt, t)−˜η(xt, x0)∥2 .(267)
+21
+
+===== PAGE 22 =====
+Next, we express˜η(xt, x0)in terms of the latent variableK t. From the forward process,
+xt = √¯αt x0 +
+√
+1−¯αt Kt,(268)
+which implies
+x0 = xt − √1−¯αt Kt√¯αt
+.(269)
+Substituting this into˜η(xt, x0)gives
+˜η(xt, x0) = 1
+2
+r αt
+βt
+1+
+√¯αt−1
+1−¯αt−1
+· xt − √1−¯αt Kt√¯αt
+(270)
+= 1
+2
+r αt
+βt
+1+ 1
+(1−¯αt−1)√αt
+xt −
+√1−¯αt
+(1−¯αt−1)√αt
+Kt.(271)
+Therefore, we can write
+˜η(xt, x0) = ˜ηx(xt)−b tKt,(272)
+where
+˜ηx(xt) = 1
+2
+r αt
+βt
+1+ 1
+(1−¯αt−1)√αt
+xt,(273)
+bt =
+√1−¯αt
+(1−¯αt−1)√αt
+.(274)
+We parameterize the model natural parameter in the same form:
+ηθ(xt, t) = ˜ηx(xt)−b tKθ(xt, t),(275)
+Substituting ˜η(xt, x0) = ˜ηx(xt)−b tKt and ηθ(xt, t) = ˜ηx(xt)−b tKθ(xt, t) into (267), we obtain
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))(276)
+= σ2
+t
+2 ∥(˜ηx(xt)−b tKθ(xt, t))−(˜ηx(xt)−b tKt)∥2 (277)
+= σ2
+t b2
+t
+2 ∥Kθ(xt, t)−K t∥2.(278)
+Since
+σ2
+t b2
+t = βt(1−¯αt−1)
+1−¯αt
+· 1−¯αt
+αt(1−¯αt−1)2 (279)
+= βt
+αt(1−¯αt−1) ,(280)
+it follows that
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t)) = βt
+2αt(1−¯αt−1) ∥Kθ(xt, t)−K t∥2.(281)
+Therefore, a natural training objective is
+˜L=E q
+
+DKL(q(xT |x 0)∥p(xT )) +
+X
+t>1
+βt
+2αt(1−¯αt−1) ∥Kθ(xt, t)−K t∥2 −logp θ(x0 |x 1)
+
+.
+(282)
+3.7 Dirichlet Distribution
+Letε 1, ε2, . . . , εT be a sequence of i.i.d. random vectors distributed asDir(γ)on the simplex
+∆d−1 =
+n
+z∈R d :z i >0,
+dX
+i=1
+zi = 1
+o
+.
+22
+
+===== PAGE 23 =====
+Their mean is
+µ=E[ε t] = γ
+γ0
+, γ 0 =
+dX
+i=1
+γi.
+For a fixed variance schedule(β t)T
+t=1 withα t = 1−β t, we define the forward process
+xt = √αt xt−1 +
+p
+βt (εt −µ).(283)
+Then,
+q(xt |x t−1) = 1
+(√βt)d Pε
+ xt − √αtxt−1 + √βtµ√βt
+
+,(284)
+where the Dirichlet density satisfies
+Pε(z)∝
+dY
+i=1
+zγi−1
+i 1{z∈∆d−1}.(285)
+Hence,
+q(xt |x t−1)∝ 1
+(√βt)d
+dY
+i=1
+z γi−1
+t,i 1{zt∈∆d−1},(286)
+where
+zt = xt − √αtxt−1 + √βtµ√βt
+=a t −b txt−1,(287)
+with
+at = xt + √βtµ√βt
+, b t =
+r αt
+βt
+.(288)
+Therefore,
+q(xt |x t−1) = 1
+(√βt)d
+dY
+i=1
+(at,i −b txt−1,i)γi−1 1{at−btxt−1∈∆d−1}.(289)
+Thus, we write
+q(xt |x t−1) =g D(xt, xt−1) exp
+ 
+η0(xt)T T0(xt−1)
+
+,(290)
+where
+gD(xt, xt−1) = 1
+(√βt)d
+dY
+i=1
+(at,i −b txt−1,i)γi−1 1{at−btxt−1∈∆d−1},(291)
+η0(xt) = 0,(292)
+T0(xt−1) =x t−1,(293)
+A0(η0(xt)) = 0.(294)
+Then, we define
+˜η(xt, x0) :=η 0(xt) +
+√¯αt−1
+1−¯αt−1
+x0 (295)
+=
+√¯αt−1
+1−¯αt−1
+x0,(296)
+so that
+η(xt, x0)T T(x t−1) = ˜η(xt, x0)T xt−1.(297)
+23
+
+===== PAGE 24 =====
+For the distributionD, we use the same log-partition form as above. Hence,
+A(η(xt, x0)) =A(˜η(xt, x0))(298)
+= log
+Z
+Rd
+exp
+
+− ∥xt−1∥2
+2(1−¯αt−1)
+
+exp
+
+−1−β t
+2βt
+∥xt−1∥2
+
+exp
+ 
+˜η(xt, x0)T xt−1
+
+dxt−1.
+(299)
+Equivalently,
+A(˜η(xt, x0)) = log
+Z
+Rd
+exp
+
+−1
+2
+ 1
+1−¯αt−1
++ 1−β t
+βt
+
+∥xt−1∥2 + ˜η(xt, x0)T xt−1
+
+dxt−1.
+(300)
+Define
+σ2
+t := 1
+1
+1−¯αt−1
++ 1−βt
+βt
+= βt(1−¯αt−1)
+1−¯αt
+.(301)
+Using the Gaussian integral identity, we obtain
+A(˜η(xt, x0)) = log
+
+(
+q
+2πσ2
+t )d
+
++ σ2
+t
+2 ∥˜η(xt, x0)∥2.(302)
+Therefore,
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))(303)
+=A(η θ(xt, t))−A(˜η(xt, x0))−(η θ(xt, t)−˜η(xt, x0))T ∇A(˜η(xt, x0))(304)
+= σ2
+t
+2 ∥ηθ(xt, t)−˜η(xt, x0)∥2 .(305)
+Next, we express˜η(xt, x0)in terms of the latent variableK t. From the forward process,
+xt = √¯αt x0 +
+√
+1−¯αt Kt,(306)
+which implies
+x0 = xt − √1−¯αt Kt√¯αt
+.(307)
+Substituting this into˜η(xt, x0)gives
+˜η(xt, x0) =
+√¯αt−1
+1−¯αt−1
+· xt − √1−¯αt Kt√¯αt
+(308)
+= 1
+(1−¯αt−1)√αt
+xt −
+√1−¯αt
+(1−¯αt−1)√αt
+Kt.(309)
+Therefore, we can write
+˜η(xt, x0) = ˜ηx(xt)−b tKt,(310)
+where
+˜ηx(xt) = 1
+(1−¯αt−1)√αt
+xt,(311)
+bt =
+√1−¯αt
+(1−¯αt−1)√αt
+.(312)
+We parameterize the model natural parameter in the same form:
+ηθ(xt, t) = ˜ηx(xt)−b tKθ(xt, t),(313)
+24
+
+===== PAGE 25 =====
+Substituting ˜η(xt, x0) = ˜ηx(xt)−b tKt and ηθ(xt, t) = ˜ηx(xt)−b tKθ(xt, t) into (305), we obtain
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))(314)
+= σ2
+t
+2 ∥(˜ηx(xt)−b tKθ(xt, t))−(˜ηx(xt)−b tKt)∥2 (315)
+= σ2
+t b2
+t
+2 ∥Kθ(xt, t)−K t∥2.(316)
+Since
+σ2
+t b2
+t = βt(1−¯αt−1)
+1−¯αt
+· 1−¯αt
+αt(1−¯αt−1)2 (317)
+= βt
+αt(1−¯αt−1) ,(318)
+it follows that
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t)) = βt
+2αt(1−¯αt−1) ∥Kθ(xt, t)−K t∥2.(319)
+Therefore, a natural training objective is
+˜L=E q
+
+DKL(q(xT |x 0)∥p(xT )) +
+X
+t>1
+βt
+2αt(1−¯αt−1) ∥Kθ(xt, t)−K t∥2 −logp θ(x0 |x 1)
+
+.
+(320)
+3.8 Inverse-Gamma Distribution
+Let ε1, ε2, . . . , εT be a sequence of i.i.d. random vectors such that each coordinate follows
+Inv-Gamma(κ, θ), applied component-wise, with mean
+µ=E[Inv-Gamma(κ, θ)] = θ
+κ−1 , κ >1.
+For a fixed variance schedule(β t)T
+t=1 withα t = 1−β t, we define the forward process
+xt = √αt xt−1 +
+p
+βt (εt −µ1).(321)
+Then,
+q(xt |x t−1) = 1
+(√βt)d Pε
+ xt − √αtxt−1 + √βtµ1√βt
+
+,(322)
+where the inverse-Gamma density satisfies
+Pε(z)∝
+dY
+i=1
+z−(κ+1)
+i exp
+
+− θ
+zi
+
+1{zi>0}.(323)
+Hence,
+q(xt |x t−1)∝ 1
+(√βt)d
+dY
+i=1
+z−(κ+1)
+t,i exp
+
+− θ
+zt,i
+
+1{zt,i>0},(324)
+where
+zt = xt − √αtxt−1 + √βtµ1√βt
+=a t −b txt−1,(325)
+with
+at = xt + √βtµ1√βt
+, b t =
+r αt
+βt
+.(326)
+25
+
+===== PAGE 26 =====
+Therefore,
+q(xt |x t−1) = 1
+(√βt)d
+dY
+i=1
+(at,i −b txt−1,i)−(κ+1) exp
+
+− θ
+at,i −b txt−1,i
+
+1{at,i−btxt−1,i>0}.
+(327)
+Thus, we write
+q(xt |x t−1) =g IG(xt, xt−1) exp
+ 
+η0(xt)T T0(xt−1)
+
+,(328)
+where
+gIG(xt, xt−1) = 1
+(√βt)d
+dY
+i=1
+(at,i −b txt−1,i)−(κ+1) exp
+
+− θ
+at,i −b txt−1,i
+
+1{at,i−btxt−1,i>0},
+(329)
+η0(xt) = 0,(330)
+T0(xt−1) =x t−1,(331)
+A0(η0(xt)) = 0.(332)
+Then, we define
+˜η(xt, x0) :=η 0(xt) +
+√¯αt−1
+1−¯αt−1
+x0 (333)
+=
+√¯αt−1
+1−¯αt−1
+x0,(334)
+so that
+η(xt, x0)T T(x t−1) = ˜η(xt, x0)T xt−1.(335)
+For the inverse Gaussian distribution, we use the same log-partition form as above. Hence,
+A(η(xt, x0)) =A(˜η(xt, x0))(336)
+= log
+Z
+Rd
+exp
+
+− ∥xt−1∥2
+2(1−¯αt−1)
+
+exp
+
+−1−β t
+2βt
+∥xt−1∥2
+
+exp
+ 
+˜η(xt, x0)T xt−1
+
+dxt−1.
+(337)
+Equivalently,
+A(˜η(xt, x0)) = log
+Z
+Rd
+exp
+
+−1
+2
+ 1
+1−¯αt−1
++ 1−β t
+βt
+
+∥xt−1∥2 + ˜η(xt, x0)T xt−1
+
+dxt−1.
+(338)
+Define
+σ2
+t := 1
+1
+1−¯αt−1
++ 1−βt
+βt
+= βt(1−¯αt−1)
+1−¯αt
+.(339)
+Using the Gaussian integral identity, we obtain
+A(˜η(xt, x0)) = log
+
+(
+q
+2πσ2
+t )d
+
++ σ2
+t
+2 ∥˜η(xt, x0)∥2.(340)
+Therefore,
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))(341)
+=A(η θ(xt, t))−A(˜η(xt, x0))−(η θ(xt, t)−˜η(xt, x0))T ∇A(˜η(xt, x0))(342)
+= σ2
+t
+2 ∥ηθ(xt, t)−˜η(xt, x0)∥2 .(343)
+Next, we express˜η(xt, x0)in terms of the latent variableK t. From the forward process,
+xt = √¯αt x0 +
+√
+1−¯αt Kt,(344)
+26
+
+===== PAGE 27 =====
+which implies
+x0 = xt − √1−¯αt Kt√¯αt
+.(345)
+Substituting this into˜η(xt, x0)gives
+˜η(xt, x0) =
+√¯αt−1
+1−¯αt−1
+· xt − √1−¯αt Kt√¯αt
+(346)
+= 1
+(1−¯αt−1)√αt
+xt −
+√1−¯αt
+(1−¯αt−1)√αt
+Kt.(347)
+Therefore, we can write
+˜η(xt, x0) = ˜ηx(xt)−b tKt,(348)
+where
+˜ηx(xt) = 1
+(1−¯αt−1)√αt
+xt,(349)
+bt =
+√1−¯αt
+(1−¯αt−1)√αt
+.(350)
+We parameterize the model natural parameter in the same form:
+ηθ(xt, t) = ˜ηx(xt)−b tKθ(xt, t),(351)
+Substituting ˜η(xt, x0) = ˜ηx(xt)−b tKt and ηθ(xt, t) = ˜ηx(xt)−b tKθ(xt, t) into (343), we obtain
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t))(352)
+= σ2
+t
+2 ∥(˜ηx(xt)−b tKθ(xt, t))−(˜ηx(xt)−b tKt)∥2 (353)
+= σ2
+t b2
+t
+2 ∥Kθ(xt, t)−K t∥2.(354)
+Since
+σ2
+t b2
+t = βt(1−¯αt−1)
+1−¯αt
+· 1−¯αt
+αt(1−¯αt−1)2 (355)
+= βt
+αt(1−¯αt−1) ,(356)
+it follows that
+DKL(˜q(xt−1 |x t, x0)∥p θ(xt−1 |x t)) = βt
+2αt(1−¯αt−1) ∥Kθ(xt, t)−K t∥2.(357)
+Therefore, a natural training objective is
+˜L=E q
+
+DKL(q(xT |x 0)∥p(xT )) +
+X
+t>1
+βt
+2αt(1−¯αt−1) ∥Kθ(xt, t)−K t∥2 −logp θ(x0 |x 1)
+
+.
+(358)
+3.9 Wishart Distribution
+For the Wishart distribution Wp(ν,Σ) on the cone of symmetric positive definite matrices Sp
++, the
+density is
+pW(Z)∝ |Z| (ν−p−1)/2 exp
+
+− 1
+2tr(Σ−1Z)
+
+1{Z∈S p
++}.
+Letε 1, . . . , εT be i.i.d. withε t ∼ W p(ν,Σ)and mean
+M:=E[ε t] =νΣ.
+27
+
+===== PAGE 28 =====
+For a fixed variance schedule(β t)T
+t=1 withα t = 1−β t, we define the forward process on matrices
+Xt = √αt Xt−1 +
+p
+βt (εt −M).(359)
+Then the conditional density takes the form
+q(Xt |X t−1) = 1
+(√βt)m Pε
+ Xt − √αtXt−1 + √βtM√βt
+
+,(360)
+where m:=p(p+ 1)/2 is the dimension of the symmetric matrix space. Ignoring the global
+normalizing constant depending only onν,Σ, we may write
+q(Xt |X t−1) = 1
+(√βt)m |Zt|(ν−p−1)/2 exp
+
+− 1
+2tr(Σ−1Zt)
+
+1{Zt∈Sp
++},(361)
+where
+Zt = Xt − √αtXt−1 + √βtM√βt
+=A t −b tXt−1,(362)
+with
+At = Xt + √βtM√βt
+, b t =
+r αt
+βt
+.(363)
+Therefore,
+q(Xt |X t−1) = 1
+(√βt)m |At −b tXt−1|(ν−p−1)/2 exp
+
+− 1
+2tr(Σ−1(At −b tXt−1))
+
+1{At−btXt−1∈Sp
++}
+(364)
+= 1
+(√βt)m exp
+
+− 1
+2tr(Σ−1At)
+
+|At −b tXt−1|(ν−p−1)/2 1{At−btXt−1∈Sp
++} (365)
+×exp
+
+bt
+2 tr(Σ−1Xt−1)
+
+.(366)
+Thus, we write
+q(Xt |X t−1) =g W (Xt, Xt−1) exp
+ 
+⟨η0(Xt), T0(Xt−1)⟩
+
+,(367)
+where
+gW (Xt, Xt−1) = 1
+(√βt)m exp
+
+− 1
+2tr(Σ−1At)
+
+|At −b tXt−1|(ν−p−1)/2 1{At−btXt−1∈Sp
++},
+(368)
+η0(Xt) = bt
+2 Σ−1 = 1
+2
+r αt
+βt
+Σ−1,(369)
+T0(Xt−1) =X t−1,(370)
+A0(η0(Xt)) = 0.(371)
+Then, we define
+˜η(Xt, X0) :=η 0(Xt) +
+√¯αt−1
+1−¯αt−1
+X0 (372)
+= 1
+2
+r αt
+βt
+Σ−1 +
+√¯αt−1
+1−¯αt−1
+X0,(373)
+so that
+η(Xt, X0)T T(X t−1) =
+
+˜η(Xt, X0), Xt−1
+
+.(374)
+For the Wishart distribution, we use the same log-partition form as above. Hence,
+A(η(Xt, X0)) =A(˜η(Xt, X0))(375)
+= log
+Z
+Sp
+exp
+
+− ∥Xt−1∥2
+F
+2(1−¯αt−1)
+
+exp
+
+−1−β t
+2βt
+∥Xt−1∥2
+F
+
+exp(⟨˜η(Xt, X0), Xt−1⟩)dX t−1.
+(376)
+28
+
+===== PAGE 29 =====
+Equivalently,
+A(˜η(Xt, X0)) = log
+Z
+Sp
+exp
+
+−1
+2
+ 1
+1−¯αt−1
++ 1−β t
+βt
+
+∥Xt−1∥2
+F +⟨˜η(Xt, X0), Xt−1⟩
+
+dXt−1.
+(377)
+Define
+σ2
+t := 1
+1
+1−¯αt−1
++ 1−βt
+βt
+= βt(1−¯αt−1)
+1−¯αt
+.(378)
+Using the Gaussian integral identity on the symmetric-matrix space, we obtain
+A(˜η(Xt, X0)) = log
+
+(
+q
+2πσ2
+t )m
+
++ σ2
+t
+2 ∥˜η(Xt, X0)∥2
+F ,(379)
+wherem= p(p+1)
+2 is the dimension ofS p.
+Therefore,
+DKL(˜q(Xt−1 |X t, X0)∥p θ(Xt−1 |X t))(380)
+=A(η θ(Xt, t))−A(˜η(Xt, X0))−
+
+ηθ(Xt, t)−˜η(Xt, X0),∇A(˜η(Xt, X0))
+
+(381)
+= σ2
+t
+2 ∥ηθ(Xt, t)−˜η(Xt, X0)∥2
+F .(382)
+Next, we express˜η(Xt, X0)in terms of the latent variableK t. From the forward process,
+Xt = √¯αt X0 +
+√
+1−¯αt Kt,(383)
+which implies
+X0 = Xt − √1−¯αt Kt√¯αt
+.(384)
+Substituting this into˜η(Xt, X0)gives
+˜η(Xt, X0) = 1
+2
+r αt
+βt
+Σ−1 +
+√¯αt−1
+1−¯αt−1
+· Xt − √1−¯αt Kt√¯αt
+(385)
+= 1
+2
+r αt
+βt
+Σ−1 + 1
+(1−¯αt−1)√αt
+Xt −
+√1−¯αt
+(1−¯αt−1)√αt
+Kt.(386)
+Therefore, we can write
+˜η(Xt, X0) = ˜ηX(Xt)−b η
+t Kt,(387)
+where
+˜ηX(Xt) = 1
+2
+r αt
+βt
+Σ−1 + 1
+(1−¯αt−1)√αt
+Xt,(388)
+bη
+t =
+√1−¯αt
+(1−¯αt−1)√αt
+.(389)
+We parameterize the model natural parameter in the same form:
+ηθ(Xt, t) = ˜ηX(Xt)−b η
+t Kθ(Xt, t),(390)
+Substituting ˜η(Xt, X0) = ˜ηX(Xt)−b η
+t Kt and ηθ(Xt, t) = ˜ηX(Xt)−b η
+t Kθ(Xt, t) into (382), we
+obtain
+DKL(˜q(Xt−1 |X t, X0)∥p θ(Xt−1 |X t))(391)
+= σ2
+t
+2 ∥(˜ηX(Xt)−b η
+t Kθ(Xt, t))−(˜ηX(Xt)−b η
+t Kt)∥2
+F (392)
+= σ2
+t (bη
+t )2
+2 ∥Kθ(Xt, t)−K t∥2
+F .(393)
+29
+
+===== PAGE 30 =====
+Since
+σ2
+t (bη
+t )2 = βt(1−¯αt−1)
+1−¯αt
+· 1−¯αt
+αt(1−¯αt−1)2 (394)
+= βt
+αt(1−¯αt−1) ,(395)
+it follows that
+DKL(˜q(Xt−1 |X t, X0)∥p θ(Xt−1 |X t)) = βt
+2αt(1−¯αt−1) ∥Kθ(Xt, t)−K t∥2
+F .(396)
+Therefore, a natural training objective is
+˜L=E q
+
+DKL(q(XT |X 0)∥p(XT )) +
+X
+t>1
+βt
+2αt(1−¯αt−1) ∥Kθ(Xt, t)−K t∥2
+F −logp θ(X0 |X 1)
+
+.
+(397)
+3.10 Inverse-Wishart Distribution
+For the Inverse-Wishart IW p(ν,Ψ) distribution on the cone of symmetric positive definite matrices
+Sp
++, we have the density
+pIW (Z)∝ |Z| −(ν+p+1)/2 exp
+
+− 1
+2tr(ΨZ −1)
+
+1{Z∈S p
++}.
+Let ε1, ε2, . . . , εT be a sequence of i.i.d. random matrices distributed as IW p(ν,Ψ) . Assuming
+ν > p+ 1, their mean is
+M=E[ε t] = Ψ
+ν−p−1 ∈S p
++.
+For a fixed variance schedule(β t)T
+t=1 withα t = 1−β t, we define the forward process
+Xt = √αt Xt−1 +
+p
+βt (εt −M).(398)
+Then the conditional density takes the form
+q(Xt |X t−1) = 1
+(√βt)m Pε
+ Xt − √αtXt−1 + √βtM√βt
+
+,(399)
+where m:=p(p+ 1)/2 and Pε is the density of the Inverse-Wishart noise. Ignoring the global
+normalizing constant depending only onν,Ψ, we may write
+q(Xt |X t−1) = 1
+(√βt)m |Zt|−(ν+p+1)/2 exp
+
+− 1
+2tr(ΨZ −1
+t )
+
+1{Zt∈Sp
++},(400)
+where
+Zt = Xt − √αtXt−1 + √βtM√βt
+=A t −b tXt−1,(401)
+with
+At = Xt + √βtM√βt
+, b t =
+r αt
+βt
+.(402)
+Therefore,
+q(Xt |X t−1) = 1
+(√βt)m |At −b tXt−1|−(ν+p+1)/2 exp
+
+− 1
+2tr
+ 
+Ψ(At −b tXt−1)−1
+1{At−btXt−1∈Sp
++}.
+(403)
+Thus, we write
+q(Xt |X t−1) =g IW (Xt, Xt−1) exp
+ 
+⟨η0(Xt), T0(Xt−1)⟩
+
+,(404)
+30
+
+===== PAGE 31 =====
+where
+gIW (Xt, Xt−1) = 1
+(√βt)m |At −b tXt−1|−(ν+p+1)/2 exp
+
+− 1
+2tr
+ 
+Ψ(At −b tXt−1)−1
+1{At−btXt−1∈Sp
++},
+(405)
+η0(Xt) = 0,(406)
+T0(Xt−1) =X t−1,(407)
+A0(η0(Xt)) = 0.(408)
+Then, we define
+˜η(Xt, X0) :=η 0(Xt) +
+√¯αt−1
+1−¯αt−1
+X0 (409)
+=
+√¯αt−1
+1−¯αt−1
+X0,(410)
+so that
+η(Xt, X0)T T(X t−1) =
+
+˜η(Xt, X0), Xt−1
+
+.(411)
+For the inverse Wishart distribution, we use the same log-partition form as above. Hence,
+A(η(Xt, X0)) =A(˜η(Xt, X0))(412)
+= log
+Z
+Sp
+exp
+
+− ∥Xt−1∥2
+F
+2(1−¯αt−1)
+
+exp
+
+−1−β t
+2βt
+∥Xt−1∥2
+F
+
+exp(⟨˜η(Xt, X0), Xt−1⟩)dX t−1.
+(413)
+Equivalently,
+A(˜η(Xt, X0)) = log
+Z
+Sp
+exp
+
+−1
+2
+ 1
+1−¯αt−1
++ 1−β t
+βt
+
+∥Xt−1∥2
+F +⟨˜η(Xt, X0), Xt−1⟩
+
+dXt−1.
+(414)
+Define
+σ2
+t := 1
+1
+1−¯αt−1
++ 1−βt
+βt
+= βt(1−¯αt−1)
+1−¯αt
+.(415)
+Using the Gaussian integral identity on the symmetric-matrix space, we obtain
+A(˜η(Xt, X0)) = log
+
+(
+q
+2πσ2
+t )m
+
++ σ2
+t
+2 ∥˜η(Xt, X0)∥2
+F ,(416)
+wherem= p(p+1)
+2 is the dimension ofS p.
+Therefore,
+DKL(˜q(Xt−1 |X t, X0)∥p θ(Xt−1 |X t))(417)
+=A(η θ(Xt, t))−A(˜η(Xt, X0))−
+
+ηθ(Xt, t)−˜η(Xt, X0),∇A(˜η(Xt, X0))
+
+(418)
+= σ2
+t
+2 ∥ηθ(Xt, t)−˜η(Xt, X0)∥2
+F .(419)
+Next, we express˜η(Xt, X0)in terms of the latent variableK t. From the forward process,
+Xt = √¯αt X0 +
+√
+1−¯αt Kt,(420)
+which implies
+X0 = Xt − √1−¯αt Kt√¯αt
+.(421)
+31
+
+===== PAGE 32 =====
+Substituting this into˜η(Xt, X0)gives
+˜η(Xt, X0) =
+√¯αt−1
+1−¯αt−1
+· Xt − √1−¯αt Kt√¯αt
+(422)
+= 1
+(1−¯αt−1)√αt
+Xt −
+√1−¯αt
+(1−¯αt−1)√αt
+Kt.(423)
+Therefore, we can write
+˜η(Xt, X0) = ˜ηX(Xt)−b η
+t Kt,(424)
+where
+˜ηX(Xt) = 1
+(1−¯αt−1)√αt
+Xt,(425)
+bη
+t =
+√1−¯αt
+(1−¯αt−1)√αt
+.(426)
+We parameterize the model natural parameter in the same form:
+ηθ(Xt, t) = ˜ηX(Xt)−b η
+t Kθ(Xt, t),(427)
+or equivalently,
+Kθ(Xt, t) := ˜ηX(Xt)−η θ(Xt, t)
+bη
+t
+.(428)
+Substituting ˜η(Xt, X0) = ˜ηX(Xt)−b η
+t Kt and ηθ(Xt, t) = ˜ηX(Xt)−b η
+t Kθ(Xt, t) into (419), we
+obtain
+DKL(˜q(Xt−1 |X t, X0)∥p θ(Xt−1 |X t))(429)
+= σ2
+t
+2 ∥(˜ηX(Xt)−b η
+t Kθ(Xt, t))−(˜ηX(Xt)−b η
+t Kt)∥2
+F (430)
+= σ2
+t (bη
+t )2
+2 ∥Kθ(Xt, t)−K t∥2
+F .(431)
+Since
+σ2
+t (bη
+t )2 = βt(1−¯αt−1)
+1−¯αt
+· 1−¯αt
+αt(1−¯αt−1)2 (432)
+= βt
+αt(1−¯αt−1) ,(433)
+it follows that
+DKL(˜q(Xt−1 |X t, X0)∥p θ(Xt−1 |X t)) = βt
+2αt(1−¯αt−1) ∥Kθ(Xt, t)−K t∥2
+F .(434)
+Therefore, a natural training objective is
+˜L=E q
+
+DKL(q(XT |X 0)∥p(XT )) +
+X
+t>1
+βt
+2αt(1−¯αt−1) ∥Kθ(Xt, t)−K t∥2
+F −logp θ(X0 |X 1)
+
+.
+(435)
+32
